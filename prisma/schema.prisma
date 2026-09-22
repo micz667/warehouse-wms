@@ -31,32 +31,42 @@ enum MovementType {
   transfer
 }
 
+/// Architect shopping list lifecycle. Fulfillment is a warehouse checklist only.
+enum ShoppingListStatus {
+  draft
+  submitted
+  done
+}
+
 model User {
-  id                String             @id @default(cuid())
-  email             String             @unique
-  passwordHash      String
-  name              String?
-  role              Role               @default(magazynier)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  stocktakeSessions StocktakeSession[]
-  movements         Movement[]
+  id                   String             @id @default(cuid())
+  email                String             @unique
+  passwordHash         String
+  name                 String?
+  role                 Role               @default(magazynier)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  stocktakeSessions    StocktakeSession[]
+  movements            Movement[]
+  shoppingLists        ShoppingList[]
+  shoppingListChecks   ShoppingListLine[] @relation("ShoppingListLineCheckedBy")
 }
 
 /// Durable catalog SKU. Barcode is Code128-compatible (alphanumeric).
 /// Stock quantity is never stored here — balances come from movements.
 model CatalogItem {
-  id            String         @id @default(cuid())
-  sku           String         @unique
-  name          String
-  category      String
-  unit          String
-  barcode       String         @unique
-  photoPath     String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  stocktakeLines StocktakeLine[]
-  movements     Movement[]
+  id               String             @id @default(cuid())
+  sku              String             @unique
+  name             String
+  category         String
+  unit             String
+  barcode          String             @unique
+  photoPath        String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  stocktakeLines   StocktakeLine[]
+  movements        Movement[]
+  shoppingListLines ShoppingListLine[]
 
   @@index([name])
   @@index([category])
@@ -128,4 +138,40 @@ model Movement {
 
   @@index([catalogItemId, locationId])
   @@index([stocktakeSessionId])
+}
+
+/// Architect shopping list. Lines are catalog picks; warehouse checks them off.
+model ShoppingList {
+  id          String             @id @default(cuid())
+  status      ShoppingListStatus @default(draft)
+  title       String?
+  note        String?
+  createdById String?
+  submittedAt DateTime?
+  doneAt      DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  lines       ShoppingListLine[]
+  createdBy   User?              @relation(fields: [createdById], references: [id])
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ShoppingListLine {
+  id            String       @id @default(cuid())
+  listId        String
+  catalogItemId String
+  qty           Decimal      @db.Decimal(18, 3)
+  note          String?
+  checkedAt     DateTime?
+  checkedById   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  list          ShoppingList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  catalogItem   CatalogItem  @relation(fields: [catalogItemId], references: [id])
+  checkedBy     User?        @relation("ShoppingListLineCheckedBy", fields: [checkedById], references: [id])
+
+  @@unique([listId, catalogItemId])
+  @@index([listId])
 }

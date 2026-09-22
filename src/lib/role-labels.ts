@@ -11,7 +11,7 @@ export function shellBlurbForRole(role: Role): string {
     case "magazynier":
       return "Widok hali: skan przyjęć, przesunięć i wydań.";
     case "architekt":
-      return "Widok architekta: listy zakupów (kolejne slice'y).";
+      return "Widok architekta: listy zakupów z katalogu.";
     case "admin":
       return "Widok administratora: użytkownicy i historia ruchów.";
   }

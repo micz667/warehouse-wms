@@ -23,7 +23,9 @@
     "prove:stock-from-movements-db": "tsx scripts/prove-stock-from-movements-db.ts",
     "prove:scan-movements": "tsx scripts/prove-scan-movements.ts",
     "prove:scan-movements-db": "tsx scripts/prove-scan-movements-db.ts",
-    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog && npm run prove:locations && npm run prove:stocktake && npm run prove:stocktake-db && npm run prove:stock-from-movements && npm run prove:stock-from-movements-db && npm run prove:scan-movements && npm run prove:scan-movements-db"
+    "prove:shopping-lists": "tsx scripts/prove-shopping-lists.ts",
+    "prove:shopping-lists-db": "tsx scripts/prove-shopping-lists-db.ts",
+    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog && npm run prove:locations && npm run prove:stocktake && npm run prove:stocktake-db && npm run prove:stock-from-movements && npm run prove:stock-from-movements-db && npm run prove:scan-movements && npm run prove:scan-movements-db && npm run prove:shopping-lists && npm run prove:shopping-lists-db"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
