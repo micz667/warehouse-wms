@@ -16,7 +16,7 @@ On the hall PWA, magazynier/admin complete **Przyjęcie**, **Przesunięcie**, an
 3. Issue refuses when it would drive balance negative; refused call leaves balance unchanged — same DB prove.
 4. `npm run check` includes `prove:scan-movements` and `prove:scan-movements-db`.
 
-`npm run check` on clean candidate (implementation `c5e98e2` + board/outcome tip below):
+`npm run check` on clean candidate `8862d22` (implementation `c5e98e2` + board/outcome):
 
 ```
 > warehouse-wms@0.1.0 check
