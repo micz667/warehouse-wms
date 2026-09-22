@@ -8,14 +8,15 @@
 
 ## NOW
 
-- F008 · Architect shopping lists
+- F009 · Admin users and movement history
 
 ## NEXT
 
-- F009 · Admin users and movement history
+- (empty — F009 is the last planned MVP slice)
 
 ## PROVEN
 
+- F008 · Architect shopping lists (draft→submit→checklist; architekt create; magazynier check-off; history)
 - F007 · Scanned receipt / transfer / issue (paired transfer rows; issue refuses negative; camera+manual scan)
 - F006 · Stock balances from movements (sumMovementQty; no raw qty column/UI; prove vs independent SUM)
 - F005 · Stocktake session → opening movements (draft/counting/approved; approve posts opening movements; stock = movement sum)
