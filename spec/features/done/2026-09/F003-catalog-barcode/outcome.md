@@ -11,17 +11,32 @@ Magazynier and admin can create and edit catalog SKUs (name, category, unit, opt
 3. Optional photo stores and displays — `POST /api/catalog/[id]/photo` writes under `storage/catalog/`, served at `/uploads/catalog/[filename]`; item page HTML includes `photoPath`; fetch of that URL → 200 (same prove script).
 4. Role gates — anon POST → 401; architekt POST → 403; magazynier POST → 201. Native `npm run check` includes `prove:catalog`.
 
-`npm run check` on clean candidate (after board/outcome commit — sha filled in companion commit message / PR):
+`npm run check` on clean candidate `1668d37`:
 
 ```
 > warehouse-wms@0.1.0 check
 > npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog
 
+> warehouse-wms@0.1.0 lint
+> eslint
+
+> warehouse-wms@0.1.0 typecheck
+> tsc --noEmit
+
+> warehouse-wms@0.1.0 prisma:validate
+> prisma validate
+The schema at prisma/schema.prisma is valid 🚀
+
+> warehouse-wms@0.1.0 prove:gate-role
+> tsx scripts/prove-gate-role.ts
 prove-gate-role: ok
+
+> warehouse-wms@0.1.0 prove:catalog
+> tsx scripts/prove-catalog.ts
 prove-catalog: ok (Code128 value shape + write/read gates)
 ```
 
-`npm run prove:catalog-http` against `npm start` on :3000:
+`npm run prove:catalog-http` against `npm start` on :3000 (same tree):
 
 ```
 prove-catalog-http: ok (persist+search, unique barcode, 401/403/201, label, photo)
