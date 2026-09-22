@@ -14,7 +14,9 @@
     "prove:auth-http": "tsx scripts/prove-auth-http.ts",
     "prove:catalog": "tsx scripts/prove-catalog.ts",
     "prove:catalog-http": "tsx scripts/prove-catalog-http.ts",
-    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog"
+    "prove:locations": "tsx scripts/prove-locations.ts",
+    "prove:locations-http": "tsx scripts/prove-locations-http.ts",
+    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog && npm run prove:locations"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

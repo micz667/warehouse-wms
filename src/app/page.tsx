@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { ROLE_LABEL_PL, shellBlurbForRole } from "@/lib/role-labels";
 import { CATALOG_WRITE_ROLES } from "@/server/catalog/roles";
+import { LOCATION_WRITE_ROLES } from "@/server/locations/roles";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -14,6 +15,9 @@ export default async function Home() {
   const role = session.user.role;
   const roleLabel = ROLE_LABEL_PL[role];
   const canWriteCatalog = (CATALOG_WRITE_ROLES as readonly string[]).includes(
+    role,
+  );
+  const canWriteLocations = (LOCATION_WRITE_ROLES as readonly string[]).includes(
     role,
   );
 
@@ -49,12 +53,26 @@ export default async function Home() {
           >
             Katalog
           </Link>
+          <Link
+            href="/lokalizacje"
+            className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+          >
+            Lokalizacje
+          </Link>
           {canWriteCatalog ? (
             <Link
               href="/katalog/nowy"
               className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
             >
               Nowa pozycja
+            </Link>
+          ) : null}
+          {canWriteLocations ? (
+            <Link
+              href="/lokalizacje/nowa"
+              className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+            >
+              Nowa lokalizacja
             </Link>
           ) : null}
         </div>
