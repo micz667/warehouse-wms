@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { ROLE_LABEL_PL, shellBlurbForRole } from "@/lib/role-labels";
+import { CATALOG_WRITE_ROLES } from "@/server/catalog/roles";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -11,6 +13,9 @@ export default async function Home() {
 
   const role = session.user.role;
   const roleLabel = ROLE_LABEL_PL[role];
+  const canWriteCatalog = (CATALOG_WRITE_ROLES as readonly string[]).includes(
+    role,
+  );
 
   return (
     <div className="flex flex-1 flex-col">
@@ -37,6 +42,22 @@ export default async function Home() {
         <p className="mt-4 max-w-md text-center text-lg leading-relaxed text-zinc-600">
           {shellBlurbForRole(role)}
         </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/katalog"
+            className="rounded bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
+          >
+            Katalog
+          </Link>
+          {canWriteCatalog ? (
+            <Link
+              href="/katalog/nowy"
+              className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+            >
+              Nowa pozycja
+            </Link>
+          ) : null}
+        </div>
       </main>
     </div>
   );

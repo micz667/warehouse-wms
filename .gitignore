@@ -47,3 +47,8 @@ next-env.d.ts
 *.db-journal
 
 /src/generated/prisma
+
+# local catalog photo uploads (keep directory)
+/storage/catalog/*
+!/storage/catalog/.gitkeep
+/public/uploads/
