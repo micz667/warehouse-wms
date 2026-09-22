@@ -42,3 +42,14 @@ model CatalogItem {
   @@index([name])
   @@index([category])
 }
+
+/// Flat hall location. `code` is the scannable Code128 value (unique).
+model Location {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([label])
+}

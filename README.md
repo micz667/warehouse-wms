@@ -59,16 +59,17 @@ Aplikacja: [http://localhost:3000](http://localhost:3000) — bez sesji przekier
 npm run check
 ```
 
-Uruchamia lint (ESLint), `tsc --noEmit`, `prisma validate`, dowód bramki ról (`prove:gate-role`) oraz dowód katalogu (`prove:catalog`: kształt Code128 + bramki zapisu/odczytu).
+Uruchamia lint (ESLint), `tsc --noEmit`, `prisma validate`, dowód bramki ról (`prove:gate-role`), dowód katalogu (`prove:catalog`) oraz dowód lokalizacji (`prove:locations`: normalizacja kodu + bramki admin write / hall read).
 
 Przy uruchomionym serwerze (`npm run build && npm start`) możesz też:
 
 ```bash
 npm run prove:auth-http
 npm run prove:catalog-http
+npm run prove:locations-http
 ```
 
-— auth sample: 401 / 403 / 200; katalog: persist+szukanie, unikalny kod, 401/403/201, strona etykiety.
+— auth sample: 401 / 403 / 200; katalog: persist+szukanie, unikalny kod, 401/403/201, strona etykiety; lokalizacje: unikalny kod, 401/403/201, by-code, stub picker, etykieta.
 
 ### Katalog (F003)
 
@@ -77,6 +78,13 @@ npm run prove:catalog-http
 - Zdjęcia opcjonalne: lokalnie w `storage/catalog/`, serwowane przez `/uploads/catalog/[filename]` (ścieżka w `CatalogItem.photoPath`)
 - Zapis (create/edit/photo): role `magazynier` i `admin`; odczyt także dla `architekt`
 - Seam dla F005: `createCatalogItem` w `src/server/catalog/create-catalog-item.ts`
+
+### Lokalizacje (F004)
+
+- UI: `/lokalizacje`, `/lokalizacje/nowa`, `/lokalizacje/[id]`, `/lokalizacje/[id]/etykieta`, stub picker `/lokalizacje/wybierz`
+- Model: unikalny `code` + `label`; kod to wartość etykiety Code128
+- Zapis: tylko `admin`; odczyt / wybór: `magazynier`, `architekt`, `admin`
+- Seam dla F007: komponent `LocationPicker` + `findLocationByCode` / `GET /api/locations/by-code/[code]`
 
 ## Spec (Limen)
 
