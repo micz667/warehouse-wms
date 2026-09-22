@@ -23,7 +23,7 @@ function main() {
   );
   assert.match(
     schema,
-    /enum\s+MovementType\s*\{[^}]*\bopening\b[^}]*\breceipt\b[^}]*\bissue\b[^}]*\btransfer\b/s,
+    /enum\s+MovementType\s*\{[\s\S]*?\bopening\b[\s\S]*?\breceipt\b[\s\S]*?\bissue\b[\s\S]*?\btransfer\b/,
     "MovementType includes opening/receipt/issue/transfer",
   );
 

@@ -55,13 +55,17 @@ function assertNoWritableStockColumn() {
     false,
     "ItemLocation must not exist — stock is movement-derived only",
   );
+  const locationBody = schema.match(/model\s+Location\s*\{([^}]+)\}/);
+  assert.ok(locationBody, "Location model present");
   assert.equal(
-    /model\s+Location\s*\{[^}]*\bqty\b/s.test(schema),
+    /\bqty\b/.test(locationBody[1]),
     false,
     "Location must not carry a writable qty",
   );
+  const catalogBody = schema.match(/model\s+CatalogItem\s*\{([^}]+)\}/);
+  assert.ok(catalogBody, "CatalogItem model present");
   assert.equal(
-    /model\s+CatalogItem\s*\{[^}]*\bqty\b/s.test(schema),
+    /\bqty\b/.test(catalogBody[1]),
     false,
     "CatalogItem must not carry a writable qty",
   );
