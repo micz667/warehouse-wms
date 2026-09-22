@@ -5,17 +5,19 @@
 - Greenfield `micz667/warehouse-wms`. Limen board + Cursor pack in repo.
 - Stack: Next.js App Router, Postgres, Prisma, Auth.js, Tailwind, Android PWA scan.
 - MVP locked in conversation 2026-09-22; Symfonia mapping dropped for now.
+- **MVP board complete** — F001–F009 proven; no further planned MVP slices.
 
 ## NOW
 
-- F009 · Admin users and movement history
+- (empty — MVP board complete)
 
 ## NEXT
 
-- (empty — F009 is the last planned MVP slice)
+- (empty)
 
 ## PROVEN
 
+- F009 · Admin users and movement history (create+role change; filtered audit on Movement ledger)
 - F008 · Architect shopping lists (draft→submit→checklist; architekt create; magazynier check-off; history)
 - F007 · Scanned receipt / transfer / issue (paired transfer rows; issue refuses negative; camera+manual scan)
 - F006 · Stock balances from movements (sumMovementQty; no raw qty column/UI; prove vs independent SUM)

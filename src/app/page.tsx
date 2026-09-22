@@ -4,12 +4,16 @@ import { LogoutButton } from "@/components/logout-button";
 import { ROLE_LABEL_PL, shellBlurbForRole } from "@/lib/role-labels";
 import { CATALOG_WRITE_ROLES } from "@/server/catalog/roles";
 import { LOCATION_WRITE_ROLES } from "@/server/locations/roles";
-import { MOVEMENT_WRITE_ROLES } from "@/server/movements/roles";
+import {
+  MOVEMENT_AUDIT_ROLES,
+  MOVEMENT_WRITE_ROLES,
+} from "@/server/movements/roles";
 import {
   SHOPPING_LIST_CREATE_ROLES,
   SHOPPING_LIST_READ_ROLES,
 } from "@/server/shopping-lists/roles";
 import { STOCKTAKE_WRITE_ROLES } from "@/server/stocktake/roles";
+import { USER_READ_ROLES } from "@/server/users/roles";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -37,6 +41,10 @@ export default async function Home() {
   ).includes(role);
   const canCreateShoppingLists = (
     SHOPPING_LIST_CREATE_ROLES as readonly string[]
+  ).includes(role);
+  const canManageUsers = (USER_READ_ROLES as readonly string[]).includes(role);
+  const canAuditMovements = (
+    MOVEMENT_AUDIT_ROLES as readonly string[]
   ).includes(role);
 
   return (
@@ -141,6 +149,22 @@ export default async function Home() {
               className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
             >
               Nowa lista zakupów
+            </Link>
+          ) : null}
+          {canManageUsers ? (
+            <Link
+              href="/uzytkownicy"
+              className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+            >
+              Użytkownicy
+            </Link>
+          ) : null}
+          {canAuditMovements ? (
+            <Link
+              href="/audyt"
+              className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+            >
+              Audyt ruchów
             </Link>
           ) : null}
         </div>

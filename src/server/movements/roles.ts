@@ -12,3 +12,8 @@ export const MOVEMENT_READ_ROLES = [
   "architekt",
   "admin",
 ] as const satisfies readonly Role[];
+
+/** Admin-grade filtered movement audit (F009). */
+export const MOVEMENT_AUDIT_ROLES = [
+  "admin",
+] as const satisfies readonly Role[];

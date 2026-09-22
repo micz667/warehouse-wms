@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/app-header";
 import { auth } from "@/auth";
-import { MOVEMENT_WRITE_ROLES } from "@/server/movements/roles";
+import {
+  MOVEMENT_AUDIT_ROLES,
+  MOVEMENT_WRITE_ROLES,
+} from "@/server/movements/roles";
 import { redirect } from "next/navigation";
 
 const FLOWS = [
@@ -36,6 +39,9 @@ export default async function RuchyPage() {
   const canWrite = (MOVEMENT_WRITE_ROLES as readonly string[]).includes(
     session.user.role,
   );
+  const canAudit = (MOVEMENT_AUDIT_ROLES as readonly string[]).includes(
+    session.user.role,
+  );
 
   return (
     <div className="flex flex-1 flex-col">
@@ -61,6 +67,16 @@ export default async function RuchyPage() {
               </Link>
             </li>
           ))}
+          {canAudit ? (
+            <li>
+              <Link href="/audyt" className="block py-4 hover:bg-zinc-50">
+                <p className="font-medium text-zinc-900">Audyt</p>
+                <p className="mt-0.5 text-sm text-zinc-600">
+                  Filtrowana historia: data, pozycja, lokalizacja, wykonawca.
+                </p>
+              </Link>
+            </li>
+          ) : null}
         </ul>
       </main>
     </div>
