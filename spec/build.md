@@ -8,15 +8,15 @@
 
 ## NOW
 
-- F007 · Scanned receipt / transfer / issue
+- F008 · Architect shopping lists
 
 ## NEXT
 
-- F008 · Architect shopping lists
 - F009 · Admin users and movement history
 
 ## PROVEN
 
+- F007 · Scanned receipt / transfer / issue (paired transfer rows; issue refuses negative; camera+manual scan)
 - F006 · Stock balances from movements (sumMovementQty; no raw qty column/UI; prove vs independent SUM)
 - F005 · Stocktake session → opening movements (draft/counting/approved; approve posts opening movements; stock = movement sum)
 - F004 · Locations (unique codes, admin CRUD, stub picker + Code128 label for F007)

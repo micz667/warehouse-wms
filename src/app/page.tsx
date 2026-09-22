@@ -4,6 +4,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { ROLE_LABEL_PL, shellBlurbForRole } from "@/lib/role-labels";
 import { CATALOG_WRITE_ROLES } from "@/server/catalog/roles";
 import { LOCATION_WRITE_ROLES } from "@/server/locations/roles";
+import { MOVEMENT_WRITE_ROLES } from "@/server/movements/roles";
 import { STOCKTAKE_WRITE_ROLES } from "@/server/stocktake/roles";
 import { redirect } from "next/navigation";
 
@@ -23,6 +24,9 @@ export default async function Home() {
   );
   const canWriteStocktake = (
     STOCKTAKE_WRITE_ROLES as readonly string[]
+  ).includes(role);
+  const canWriteMovements = (
+    MOVEMENT_WRITE_ROLES as readonly string[]
   ).includes(role);
 
   return (
@@ -52,8 +56,14 @@ export default async function Home() {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/katalog"
+            href="/ruchy"
             className="rounded bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
+          >
+            Ruchy
+          </Link>
+          <Link
+            href="/katalog"
+            className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
           >
             Katalog
           </Link>
@@ -75,6 +85,14 @@ export default async function Home() {
           >
             Stany
           </Link>
+          {canWriteMovements ? (
+            <Link
+              href="/ruchy/przyjecie"
+              className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+            >
+              Przyjęcie
+            </Link>
+          ) : null}
           {canWriteCatalog ? (
             <Link
               href="/katalog/nowy"
