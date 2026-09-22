@@ -7,7 +7,7 @@ A developer can clone the repo, start Postgres, migrate an empty baseline, and r
 ## Acceptance evidence
 
 - README documents install, `.env.example`, Docker Compose, `npm run dev`, and `npm run check`.
-- `npm run check` on the candidate (lint + `tsc --noEmit` + `prisma validate`):
+- `npm run check` on clean candidate `f93c49e` (lint + `tsc --noEmit` + `prisma validate`):
 
 ```
 > warehouse-wms@0.1.0 check
