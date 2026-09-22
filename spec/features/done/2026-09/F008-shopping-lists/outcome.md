@@ -19,7 +19,7 @@ Architects (and admin) build a **draft** shopping list from the searchable catal
 3. Admin/architect view list history — same DB prove (`statuses: ["done"]` after auto-done / complete).
 4. `npm run check` includes `prove:shopping-lists` and `prove:shopping-lists-db`.
 
-`npm run check` on clean candidate `db4adb7` (implementation; board/outcome follows):
+`npm run check` on clean candidate `9af3a55` (implementation `db4adb7` + board/outcome; folder path fix may follow):
 
 ```
 > warehouse-wms@0.1.0 check
