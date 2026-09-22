@@ -8,11 +8,10 @@
 
 ## NOW
 
-- F001 · App foundation (Next.js + Prisma + check script + empty authenticated shell)
+- F002 · Auth and roles (magazynier / architekt / admin)
 
 ## NEXT
 
-- F002 · Auth and roles (magazynier / architekt / admin)
 - F003 · Catalog + barcode label
 - F004 · Locations
 - F005 · Stocktake session → opening movements
@@ -23,4 +22,4 @@
 
 ## PROVEN
 
-- (none yet)
+- F001 · App foundation runs locally (Next.js + Prisma empty baseline + `npm run check` + Polish shell)
