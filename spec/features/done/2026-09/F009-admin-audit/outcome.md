@@ -18,7 +18,7 @@ Admin creates users (email/password/role) and changes roles from `/uzytkownicy`.
 2. Movement history shows F005/F007 posts with filters that narrow results — same DB prove (opening + receipt; item/location/actor/date filters exclude noise).
 3. `npm run check` includes `prove:admin-audit` and `prove:admin-audit-db`.
 
-`npm run check` on clean candidate `5812082`:
+`npm run check` on clean candidate `e643755` (implementation `5812082` + board/outcome):
 
 ```
 > warehouse-wms@0.1.0 check
