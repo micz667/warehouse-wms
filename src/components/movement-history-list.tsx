@@ -14,20 +14,59 @@ type MovementRow = {
   type: string;
   qty: string;
   createdAt: string;
-  catalogItem: { sku: string; name: string };
-  location: { code: string; label: string };
-  createdBy: { email: string; name: string | null } | null;
+  catalogItem: { id: string; sku: string; name: string };
+  location: { id: string; code: string; label: string };
+  createdBy: { id: string; email: string; name: string | null } | null;
 };
 
-export function MovementHistoryList() {
+type CatalogOption = { id: string; sku: string; name: string };
+type LocationOption = { id: string; code: string; label: string };
+type ActorOption = { id: string; email: string; name: string | null };
+
+type Props = {
+  /** When true, show date/item/location/actor filters (admin audit). */
+  showFilters?: boolean;
+};
+
+function toDateInputValue(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+export function MovementHistoryList({ showFilters = false }: Props) {
   const [rows, setRows] = useState<MovementRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [catalogItemId, setCatalogItemId] = useState("");
+  const [locationId, setLocationId] = useState("");
+  const [createdById, setCreatedById] = useState("");
+
+  const [catalogOptions, setCatalogOptions] = useState<CatalogOption[]>([]);
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
+  const [actorOptions, setActorOptions] = useState<ActorOption[]>([]);
+
   const load = useCallback(() => {
     startTransition(async () => {
       setError(null);
-      const res = await fetch("/api/movements?take=40");
+      const params = new URLSearchParams();
+      params.set("take", showFilters ? "100" : "40");
+      if (showFilters) {
+        if (from) {
+          params.set("from", new Date(`${from}T00:00:00`).toISOString());
+        }
+        if (to) {
+          params.set("to", new Date(`${to}T23:59:59.999`).toISOString());
+        }
+        if (catalogItemId) params.set("catalogItemId", catalogItemId);
+        if (locationId) params.set("locationId", locationId);
+        if (createdById) params.set("createdById", createdById);
+      }
+      const res = await fetch(`/api/movements?${params.toString()}`);
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as {
           error?: string;
@@ -38,21 +77,60 @@ export function MovementHistoryList() {
       const data = (await res.json()) as { movements: MovementRow[] };
       setRows(data.movements);
     });
-  }, []);
+  }, [
+    showFilters,
+    from,
+    to,
+    catalogItemId,
+    locationId,
+    createdById,
+  ]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (!showFilters) return;
+    let cancelled = false;
+    (async () => {
+      const [catalogRes, locRes, usersRes] = await Promise.all([
+        fetch("/api/catalog"),
+        fetch("/api/locations"),
+        fetch("/api/users"),
+      ]);
+      if (cancelled) return;
+      if (catalogRes.ok) {
+        const data = (await catalogRes.json()) as {
+          items?: CatalogOption[];
+        };
+        setCatalogOptions(data.items ?? []);
+      }
+      if (locRes.ok) {
+        const data = (await locRes.json()) as { locations: LocationOption[] };
+        setLocationOptions(data.locations);
+      }
+      if (usersRes.ok) {
+        const data = (await usersRes.json()) as { users: ActorOption[] };
+        setActorOptions(data.users);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [showFilters]);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-8">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
-            Historia ruchów
+            {showFilters ? "Audyt ruchów" : "Historia ruchów"}
           </h1>
           <p className="mt-1 text-zinc-600">
-            Ostatnie ruchy z aktorem i czasem — pełny audyt w F009.
+            {showFilters
+              ? "Filtruj po dacie, pozycji, lokalizacji i wykonawcy."
+              : "Ostatnie ruchy z aktorem i czasem."}
           </p>
         </div>
         <button
@@ -64,6 +142,125 @@ export function MovementHistoryList() {
           Odśwież
         </button>
       </div>
+
+      {showFilters ? (
+        <form
+          className="mt-6 grid gap-3 sm:grid-cols-2"
+          data-testid="movement-filters"
+          onSubmit={(event) => {
+            event.preventDefault();
+            load();
+          }}
+        >
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-zinc-700">Od</span>
+            <input
+              type="date"
+              value={from}
+              max={to || undefined}
+              onChange={(e) => setFrom(e.target.value)}
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-zinc-700">Do</span>
+            <input
+              type="date"
+              value={to}
+              min={from || undefined}
+              onChange={(e) => setTo(e.target.value)}
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block text-sm sm:col-span-2">
+            <span className="mb-1 block font-medium text-zinc-700">
+              Pozycja katalogu
+            </span>
+            <select
+              value={catalogItemId}
+              onChange={(e) => setCatalogItemId(e.target.value)}
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
+              data-testid="filter-catalog"
+            >
+              <option value="">Wszystkie</option>
+              {catalogOptions.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} ({item.sku})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-zinc-700">
+              Lokalizacja
+            </span>
+            <select
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
+              data-testid="filter-location"
+            >
+              <option value="">Wszystkie</option>
+              {locationOptions.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.label} ({loc.code})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-zinc-700">
+              Wykonawca
+            </span>
+            <select
+              value={createdById}
+              onChange={(e) => setCreatedById(e.target.value)}
+              className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
+              data-testid="filter-actor"
+            >
+              <option value="">Wszyscy</option>
+              {actorOptions.map((actor) => (
+                <option key={actor.id} value={actor.id}>
+                  {actor.name?.trim() || actor.email}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex flex-wrap gap-2 sm:col-span-2">
+            <button
+              type="submit"
+              className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+              disabled={pending}
+            >
+              Filtruj
+            </button>
+            <button
+              type="button"
+              className="rounded border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
+              onClick={() => {
+                setFrom("");
+                setTo("");
+                setCatalogItemId("");
+                setLocationId("");
+                setCreatedById("");
+              }}
+            >
+              Wyczyść
+            </button>
+            <button
+              type="button"
+              className="rounded border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
+              onClick={() => {
+                const today = toDateInputValue(new Date());
+                setFrom(today);
+                setTo(today);
+              }}
+            >
+              Dziś
+            </button>
+          </div>
+        </form>
+      ) : null}
 
       {error ? (
         <p className="mt-4 text-sm text-red-700" role="alert">

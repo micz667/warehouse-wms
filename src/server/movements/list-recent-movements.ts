@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 export type RecentMovementRow = {
   id: string;
@@ -10,13 +10,59 @@ export type RecentMovementRow = {
   createdBy: { id: string; email: string; name: string | null } | null;
 };
 
-/** Simple hall/admin history — actor + timestamp; full audit is F009. */
+export type ListMovementsFilters = {
+  take?: number;
+  /** Inclusive lower bound on createdAt (ISO or Date). */
+  from?: Date | string | null;
+  /** Inclusive upper bound on createdAt (ISO or Date). */
+  to?: Date | string | null;
+  catalogItemId?: string | null;
+  locationId?: string | null;
+  createdById?: string | null;
+};
+
+function parseBound(value: Date | string | null | undefined): Date | null {
+  if (value == null || value === "") return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function trimId(value: string | null | undefined): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+/**
+ * Movement history from the single Movement ledger.
+ * Optional filters narrow by date range, item, location, actor (F009).
+ */
 export async function listRecentMovements(
   db: PrismaClient,
-  options: { take?: number } = {},
+  options: ListMovementsFilters = {},
 ): Promise<RecentMovementRow[]> {
   const take = Math.min(Math.max(options.take ?? 50, 1), 200);
+  const from = parseBound(options.from);
+  const to = parseBound(options.to);
+  const catalogItemId = trimId(options.catalogItemId ?? undefined);
+  const locationId = trimId(options.locationId ?? undefined);
+  const createdById = trimId(options.createdById ?? undefined);
+
+  const where: Prisma.MovementWhereInput = {};
+  if (from || to) {
+    where.createdAt = {};
+    if (from) where.createdAt.gte = from;
+    if (to) where.createdAt.lte = to;
+  }
+  if (catalogItemId) where.catalogItemId = catalogItemId;
+  if (locationId) where.locationId = locationId;
+  if (createdById) where.createdById = createdById;
+
   const rows = await db.movement.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     take,
     include: {
