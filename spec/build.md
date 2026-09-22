@@ -8,11 +8,10 @@
 
 ## NOW
 
-- F002 · Auth and roles (magazynier / architekt / admin)
+- F003 · Catalog + barcode label
 
 ## NEXT
 
-- F003 · Catalog + barcode label
 - F004 · Locations
 - F005 · Stocktake session → opening movements
 - F006 · Stock balances from movements
@@ -22,4 +21,5 @@
 
 ## PROVEN
 
+- F002 · Auth and roles (credentials + magazynier/architekt/admin + Polish shell + sample 401/403)
 - F001 · App foundation runs locally (Next.js + Prisma empty baseline + `npm run check` + Polish shell)
