@@ -11,7 +11,7 @@ Users run a stocktake session (`spis z natury`), count qty per item × location 
 3. Stock endpoints/UI reflect opening balances — `GET /api/stock`, Polish `/stany` UI; covered by prove-stocktake-db list/sum and optional HTTP prove.
 4. `npm run check` includes `prove:stocktake` (role gates) and `prove:stocktake-db` (discriminating acceptance).
 
-`npm run check` on clean candidate `212be08`:
+`npm run check` on clean candidate `c2b856b` (implementation `212be08` + board/outcome):
 
 ```
 > warehouse-wms@0.1.0 check
