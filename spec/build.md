@@ -8,11 +8,10 @@
 
 ## NOW
 
-- F004 · Locations
+- F005 · Stocktake session → opening movements
 
 ## NEXT
 
-- F005 · Stocktake session → opening movements
 - F006 · Stock balances from movements
 - F007 · Scanned receipt / transfer / issue
 - F008 · Architect shopping lists
@@ -20,6 +19,7 @@
 
 ## PROVEN
 
+- F004 · Locations (unique codes, admin CRUD, stub picker + Code128 label for F007)
 - F003 · Catalog + barcode (Code128 labels, searchable CRUD, optional photo, magazynier/admin write)
 - F002 · Auth and roles (credentials + magazynier/architekt/admin + Polish shell + sample 401/403)
 - F001 · App foundation runs locally (Next.js + Prisma empty baseline + `npm run check` + Polish shell)
