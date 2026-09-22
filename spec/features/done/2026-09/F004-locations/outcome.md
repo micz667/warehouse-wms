@@ -10,7 +10,7 @@ Admin can create and edit flat hall locations (`code` + `label`); magazynier and
 2. Selectable/scannable stub picker — `/lokalizacje/wybierz` embeds `LocationPicker`; `GET /api/locations/by-code/[code]` resolves for magazynier. Same HTTP prove.
 3. `npm run check` includes `prove:locations` (normalize + admin write / hall read gates).
 
-`npm run check` on clean candidate `a2777b3`:
+`npm run check` on clean candidate `96d3bd9`:
 
 ```
 > warehouse-wms@0.1.0 check
