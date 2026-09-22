@@ -22,3 +22,5 @@ On Android Chrome PWA, a warehouse user completes receipt, transfer, and issue b
 ## Notes
 
 - Online-only for MVP.
+- Transfer is a paired pair of `Movement` rows (`type: transfer`): −qty at source and +qty at destination in one transaction (F006 contract).
+- Negative stock rule: issue (and transfer from source) refuses when `sumMovementQty(item, location) < qty` — no overdraw on MVP.
