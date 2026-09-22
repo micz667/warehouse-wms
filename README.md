@@ -74,7 +74,7 @@ npm run prove:catalog-http
 
 - UI: `/katalog`, `/katalog/nowy`, `/katalog/[id]`, `/katalog/[id]/etykieta`
 - Symbologia etykiet: **Code128** (JsBarcode `CODE128`), wartość `WMS` + 12 hex
-- Zdjęcia opcjonalne: lokalnie w `public/uploads/catalog/` (ścieżka w `CatalogItem.photoPath`)
+- Zdjęcia opcjonalne: lokalnie w `storage/catalog/`, serwowane przez `/uploads/catalog/[filename]` (ścieżka w `CatalogItem.photoPath`)
 - Zapis (create/edit/photo): role `magazynier` i `admin`; odczyt także dla `architekt`
 - Seam dla F005: `createCatalogItem` w `src/server/catalog/create-catalog-item.ts`
 

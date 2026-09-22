@@ -49,5 +49,6 @@ next-env.d.ts
 /src/generated/prisma
 
 # local catalog photo uploads (keep directory)
-/public/uploads/catalog/*
-!/public/uploads/catalog/.gitkeep
+/storage/catalog/*
+!/storage/catalog/.gitkeep
+/public/uploads/

@@ -14,9 +14,14 @@ export type SaveCatalogPhotoResult =
   | { ok: true; photoPath: string }
   | { ok: false; message: string };
 
+/** Absolute directory for catalog photos (local/docker; not the Next public/ cache). */
+export function catalogPhotoDir(): string {
+  return path.join(process.cwd(), "storage", "catalog");
+}
+
 /**
- * Stores an optional catalog photo under public/uploads/catalog for local/docker use.
- * Returns a public URL path like `/uploads/catalog/<file>`.
+ * Stores an optional catalog photo under storage/catalog.
+ * Returns a public URL path served by `/uploads/catalog/[filename]` (filesystem route).
  */
 export async function saveCatalogPhoto(
   itemId: string,
@@ -37,7 +42,7 @@ export async function saveCatalogPhoto(
     };
   }
 
-  const dir = path.join(process.cwd(), "public", "uploads", "catalog");
+  const dir = catalogPhotoDir();
   await mkdir(dir, { recursive: true });
 
   const filename = `${itemId}-${randomBytes(4).toString("hex")}${ext}`;

@@ -1,5 +1,7 @@
 import "dotenv/config";
 import { encode } from "next-auth/jwt";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import type { Role } from "@prisma/client";
 import { prisma } from "../src/lib/prisma";
 import { createCatalogItem } from "../src/server/catalog/create-catalog-item";
@@ -33,6 +35,7 @@ async function sessionCookie(role: Role, email: string): Promise<string> {
 async function main() {
   const suffix = Date.now().toString(36);
   const sku = `PROVE-${suffix}`;
+  const magCookie = await sessionCookie("magazynier", "mag@local");
 
   const created = await createCatalogItem(prisma, {
     sku,
@@ -85,7 +88,7 @@ async function main() {
   const mag = await fetch(`${base}/api/catalog`, {
     method: "POST",
     headers: {
-      cookie: await sessionCookie("magazynier", "mag@local"),
+      cookie: magCookie,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -102,7 +105,7 @@ async function main() {
 
   const magBody = (await mag.json()) as { item: { id: string; barcode: string } };
   const label = await fetch(`${base}/katalog/${magBody.item.id}/etykieta`, {
-    headers: { cookie: await sessionCookie("magazynier", "mag@local") },
+    headers: { cookie: magCookie },
     redirect: "manual",
   });
   if (label.status !== 200) {
@@ -113,8 +116,48 @@ async function main() {
     throw new Error("label page missing barcode value");
   }
 
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "base64",
+  );
+  const form = new FormData();
+  form.set("photo", new Blob([png], { type: "image/png" }), "dot.png");
+  const photoRes = await fetch(`${base}/api/catalog/${magBody.item.id}/photo`, {
+    method: "POST",
+    headers: { cookie: magCookie },
+    body: form,
+  });
+  const photoBody = (await photoRes.json()) as {
+    item?: { photoPath: string | null };
+    error?: string;
+  };
+  if (photoRes.status !== 200 || !photoBody.item?.photoPath) {
+    throw new Error(
+      `expected photo 200, got ${photoRes.status}: ${JSON.stringify(photoBody)}`,
+    );
+  }
+  const disk = path.join(
+    "storage",
+    "catalog",
+    path.basename(photoBody.item.photoPath),
+  );
+  if (!existsSync(disk)) {
+    throw new Error(`photo missing on disk: ${disk}`);
+  }
+  const itemPage = await fetch(`${base}/katalog/${magBody.item.id}`, {
+    headers: { cookie: magCookie },
+  });
+  const itemHtml = await itemPage.text();
+  if (!itemHtml.includes(photoBody.item.photoPath)) {
+    throw new Error("item page missing photoPath");
+  }
+  const img = await fetch(`${base}${photoBody.item.photoPath}`);
+  if (img.status !== 200) {
+    throw new Error(`expected photo URL 200, got ${img.status}`);
+  }
+
   console.log(
-    "prove-catalog-http: ok (persist+search, unique barcode, 401/403/201, label)",
+    "prove-catalog-http: ok (persist+search, unique barcode, 401/403/201, label, photo)",
   );
 }
 
