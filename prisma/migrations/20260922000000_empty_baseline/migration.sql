@@ -1,0 +1,3 @@
+-- Empty baseline migration for warehouse-wms.
+-- Domain models (catalog, locations, movements, stock derived from movements) land in later slices.
+-- Intentionally no writable stock quantity column.

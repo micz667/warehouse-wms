@@ -1,0 +1,13 @@
+// Prisma schema — warehouse WMS baseline.
+// Stock quantity must never be a writable ad-hoc column; balances come from movements (later).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Empty baseline: domain models land in later slices.
