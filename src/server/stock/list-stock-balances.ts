@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
+import { sumMovementQty } from "./sum-movement-qty";
 
 export type StockBalance = {
   catalogItemId: string;
@@ -13,21 +14,29 @@ export type StockBalance = {
 };
 
 /**
- * On-hand qty = sum of movements for item × location.
- * No writable raw qty column — F005/F006 read model.
+ * On-hand qty for one item × location = sum of movements.
+ * Delegates to `sumMovementQty` — the sole stock read path (F006).
  */
 export async function getStockBalance(
   db: PrismaClient,
   catalogItemId: string,
   locationId: string,
 ): Promise<Decimal> {
-  const agg = await db.movement.aggregate({
-    where: { catalogItemId, locationId },
-    _sum: { qty: true },
-  });
-  return agg._sum.qty ?? new Decimal(0);
+  return sumMovementQty(db, { catalogItemId, locationId });
 }
 
+/** Item total across all locations = sum of movements for that item. */
+export async function getItemStockTotal(
+  db: PrismaClient,
+  catalogItemId: string,
+): Promise<Decimal> {
+  return sumMovementQty(db, { catalogItemId });
+}
+
+/**
+ * List balances by item × location from movement group sums.
+ * Same SUM semantics as `sumMovementQty` / `getStockBalance`.
+ */
 export async function listStockBalances(
   db: PrismaClient,
 ): Promise<StockBalance[]> {

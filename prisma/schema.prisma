@@ -22,9 +22,13 @@ enum StocktakeStatus {
   approved
 }
 
-/// Explicit movement kinds. Stock is only the sum of these rows.
+/// Explicit movement kinds. Stock is only the sum of these rows (signed qty).
+/// `receipt` / `issue` / `transfer` are seeded for F006 proof; F007 adds scan UI.
 enum MovementType {
   opening
+  receipt
+  issue
+  transfer
 }
 
 model User {
@@ -104,7 +108,8 @@ model StocktakeLine {
   @@index([sessionId])
 }
 
-/// Append-only stock movement. Opening rows are written by stocktake approval.
+/// Append-only stock movement. Qty is a signed delta; balances = SUM(qty).
+/// Opening rows are written by stocktake approval; daily kinds by F007 later.
 model Movement {
   id                 String            @id @default(cuid())
   type               MovementType

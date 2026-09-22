@@ -19,7 +19,9 @@
     "prove:stocktake": "tsx scripts/prove-stocktake.ts",
     "prove:stocktake-db": "tsx scripts/prove-stocktake-db.ts",
     "prove:stocktake-http": "tsx scripts/prove-stocktake-http.ts",
-    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog && npm run prove:locations && npm run prove:stocktake && npm run prove:stocktake-db"
+    "prove:stock-from-movements": "tsx scripts/prove-stock-from-movements.ts",
+    "prove:stock-from-movements-db": "tsx scripts/prove-stock-from-movements-db.ts",
+    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog && npm run prove:locations && npm run prove:stocktake && npm run prove:stocktake-db && npm run prove:stock-from-movements && npm run prove:stock-from-movements-db"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
