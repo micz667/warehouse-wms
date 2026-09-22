@@ -25,3 +25,20 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+/// Durable catalog SKU. Barcode is Code128-compatible (alphanumeric).
+/// Stock quantity is never stored here — balances come from movements (later).
+model CatalogItem {
+  id        String   @id @default(cuid())
+  sku       String   @unique
+  name      String
+  category  String
+  unit      String
+  barcode   String   @unique
+  photoPath String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([category])
+}

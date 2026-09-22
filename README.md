@@ -59,15 +59,24 @@ Aplikacja: [http://localhost:3000](http://localhost:3000) — bez sesji przekier
 npm run check
 ```
 
-Uruchamia lint (ESLint), `tsc --noEmit`, `prisma validate` oraz dowód bramki ról (`prove:gate-role`: 401 bez roli, 403 przy złej roli).
+Uruchamia lint (ESLint), `tsc --noEmit`, `prisma validate`, dowód bramki ról (`prove:gate-role`) oraz dowód katalogu (`prove:catalog`: kształt Code128 + bramki zapisu/odczytu).
 
 Przy uruchomionym serwerze (`npm run build && npm start`) możesz też:
 
 ```bash
 npm run prove:auth-http
+npm run prove:catalog-http
 ```
 
-— przekierowanie `/` → login, API sample: 401 / 403 / 200.
+— auth sample: 401 / 403 / 200; katalog: persist+szukanie, unikalny kod, 401/403/201, strona etykiety.
+
+### Katalog (F003)
+
+- UI: `/katalog`, `/katalog/nowy`, `/katalog/[id]`, `/katalog/[id]/etykieta`
+- Symbologia etykiet: **Code128** (JsBarcode `CODE128`), wartość `WMS` + 12 hex
+- Zdjęcia opcjonalne: lokalnie w `public/uploads/catalog/` (ścieżka w `CatalogItem.photoPath`)
+- Zapis (create/edit/photo): role `magazynier` i `admin`; odczyt także dla `architekt`
+- Seam dla F005: `createCatalogItem` w `src/server/catalog/create-catalog-item.ts`
 
 ## Spec (Limen)
 
