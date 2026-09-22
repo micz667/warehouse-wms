@@ -10,7 +10,7 @@ Anywhere stock is shown, quantity equals the sum of movements for that item × l
 2. No admin UI to type a raw on-hand qty — schema + `/stany` read-only audit in `prove:stock-from-movements` and the DB prove.
 3. `npm run check` includes `prove:stock-from-movements` and `prove:stock-from-movements-db`.
 
-`npm run check` on clean candidate `5fece1d` (implementation `d0a8da4` + board/outcome):
+`npm run check` on clean candidate `3b37393` (implementation `d0a8da4` + board/outcome):
 
 ```
 > warehouse-wms@0.1.0 check
