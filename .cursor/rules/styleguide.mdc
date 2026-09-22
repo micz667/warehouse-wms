@@ -1,0 +1,15 @@
+---
+description: How this repository cuts TypeScript and React for the warehouse WMS PWA.
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Styleguide
+
+- Next.js App Router, TypeScript strict, server components by default; `"use client"` only for scan/UI state.
+- Domain rules (stock, movements, stocktake) live in plain functions under `src/server/` or `src/lib/domain/` — not in React components.
+- Prisma is the only DB access path. Stock quantity is never a writable column updated ad hoc; it is derived from movements (including opening stocktake posts).
+- One file, one job. No `utils.ts` grab-bags, no barrels that re-export the world.
+- Prefer plain functions, discriminated unions, early returns.
+- UI copy in Polish. Identifiers in code in English.
+- Before claiming done: the project's native check (`npm run check` once it exists; until then `npm run lint` and `npx tsc --noEmit`).

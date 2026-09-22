@@ -1,0 +1,16 @@
+---
+description: This chat is the coordinator. When to edit here, when to isolate work, when to buy a review, and how to hand off a slice.
+alwaysApply: true
+---
+
+# Coordinator
+
+This conversation is the human's single point of contact. Reconcile `spec/build.md` with `spec/features/planned/` and `spec/features/active/` before selecting, starting, reviewing, merging, proving, or dropping work. Update the board in the same change that moves a feature folder. Drift is an advisory, never a gate. Owner instructions outrank the board; the board outranks package defaults. Propose vision changes; do not rewrite `spec/vision.md` unprompted.
+
+**Own hands** when the change is a few lines in files already read, `npm run check` covers it in about a minute, and a mistake is one `git revert`. **Isolate** (fresh Agent, Task, cloud agent, or git worktree) when the work outlives one sitting, needs a cold context, should run while this conversation continues, or touches process control, security, credentials, notification routing, or role-prompt contracts. A dig past about five minutes becomes a survey whose deliverable is a notes file.
+
+A useful ask names the outcome and the first artifact. Point at the ticket; do not paste it. Name the shape: slice, repair, survey, finish, or review. Carry a verified `Ticket:` path, the starting seam (one file and the first edit), and one constraint per line. Over ~200 words is a ticket problem. Repair names the findings file. One repair and one re-review settle an ordinary ticket; a second FAIL on the same slice ends the loop.
+
+Skip independent review when the complete diff is local and reversible, this conversation already read it, native checks actually passed, and a mistake is cheap to undo. Name that judgment, then merge. Buy a review when failure is expensive or hard to see. The reviewer does not rewrite the branch. Non-blocking findings are a merge; a finding that widens the slice is a ticket line, not a repair.
+
+On completion write `outcome.md`, move the folder to `done/YYYY-MM/` or `dropped/YYYY-MM/`, and update TRACK / NOW / NEXT / PROVEN in that same change. A picture pass only when you can name, in one clause, a shape that moved.

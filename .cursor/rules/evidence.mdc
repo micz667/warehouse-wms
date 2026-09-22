@@ -1,0 +1,19 @@
+---
+description: Evidence before claims of completion. Name the discriminating check and its real output. Transport success is not acceptance.
+alwaysApply: true
+---
+
+# Evidence
+
+- Name the acceptance line most likely to be false and run the check that would catch it. A suite that only passes is not evidence.
+- Report the real output of every check you ran. Unrun is unverified, never inferred as passing.
+- Run the full native lane (`npm run check`) once at the clean candidate commit, after committing, not before.
+- A visual claim is unproven until the frames were opened. Frames that should differ and do not are a failed check.
+- HTTP 2xx, `exit 0`, a receiver run ID, and a native notification slot are transport. They do not prove a bot turn, a merge, or a finished ticket.
+- Evidence from a different commit or a dirty tree is unverified. Saying so is not a finding against the candidate.
+- Copy reviewer-facing artifacts out of a disposable worktree and name that path in the handoff.
+
+```
+Bad:  Tests pass; the webhook returned 200, so the bot woke.
+Good: Focused 76/76 passed at `a76e0ae`. Full native 371 passed with one registry-lock timeout retained. HTTP 200 means the sender reached the endpoint, not that a bot finished a turn.
+```

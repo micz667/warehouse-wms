@@ -1,0 +1,27 @@
+---
+description: Ticket, board, and feature-folder rules. One check per line. A file that stops being true is deleted in the change that supersedes it.
+globs: "spec/**/*.md"
+alwaysApply: false
+---
+
+# Specs
+
+A ticket is read once by a worker in a cold checkout and by an owner deciding whether it is worth doing. About three hundred words. Every line serves one of them or goes. Template: `spec/features/_template/ticket.md`.
+
+- **Title.** `FNNN · what becomes true`. The folder carries the slug; the lane carries the status.
+- **Outcome.** Two to four sentences: what someone can do or see afterwards. Product terms, no mechanism.
+- **Scope.** Boundary and starting seam as a lead, not the edit list.
+- **Out of scope.** Only nearby work someone would plausibly do by mistake.
+- **Acceptance.** One observable behavior or check per line, verifiable with a command or a look. Not "tests pass". A line holding several checks is several lines.
+- **Notes.** Decisions and open questions only. Never progress.
+
+Never put a status line, date, author tag, bare feature number, prerequisites, phases, or implementation shape in the ticket.
+
+`planned/` → `active/` when work begins → `done/YYYY-MM/` or `dropped/YYYY-MM/` when terminal. The number is stable for life. The folder keeps the ticket, notes, numbered `review-N.md`, and `outcome.md`. Delete a file that stops being true.
+
+`spec/build.md` is TRACK / NOW / NEXT / PROVEN. Update it in the same change that moves a folder. PROVEN keeps the last ten, then one month line.
+
+```
+Bad:  Acceptance — tests pass and spawn is fast and the tab focuses.
+Good: Acceptance — `limen spawn --tab` prints the job id before the worker process starts.
+```
