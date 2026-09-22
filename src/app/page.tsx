@@ -4,6 +4,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { ROLE_LABEL_PL, shellBlurbForRole } from "@/lib/role-labels";
 import { CATALOG_WRITE_ROLES } from "@/server/catalog/roles";
 import { LOCATION_WRITE_ROLES } from "@/server/locations/roles";
+import { STOCKTAKE_WRITE_ROLES } from "@/server/stocktake/roles";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -20,6 +21,9 @@ export default async function Home() {
   const canWriteLocations = (LOCATION_WRITE_ROLES as readonly string[]).includes(
     role,
   );
+  const canWriteStocktake = (
+    STOCKTAKE_WRITE_ROLES as readonly string[]
+  ).includes(role);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -59,6 +63,18 @@ export default async function Home() {
           >
             Lokalizacje
           </Link>
+          <Link
+            href="/spis"
+            className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+          >
+            Spis z natury
+          </Link>
+          <Link
+            href="/stany"
+            className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+          >
+            Stany
+          </Link>
           {canWriteCatalog ? (
             <Link
               href="/katalog/nowy"
@@ -73,6 +89,14 @@ export default async function Home() {
               className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
             >
               Nowa lokalizacja
+            </Link>
+          ) : null}
+          {canWriteStocktake ? (
+            <Link
+              href="/spis"
+              className="rounded border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
+            >
+              Nowy spis
             </Link>
           ) : null}
         </div>

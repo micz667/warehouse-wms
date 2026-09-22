@@ -1,5 +1,5 @@
 // Prisma schema — warehouse WMS.
-// Stock quantity must never be a writable ad-hoc column; balances come from movements (later).
+// Stock quantity must never be a writable ad-hoc column; balances come from movements.
 
 generator client {
   provider = "prisma-client-js"
@@ -16,28 +16,43 @@ enum Role {
   admin
 }
 
+enum StocktakeStatus {
+  draft
+  counting
+  approved
+}
+
+/// Explicit movement kinds. Stock is only the sum of these rows.
+enum MovementType {
+  opening
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String?
-  role         Role     @default(magazynier)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String
+  name              String?
+  role              Role               @default(magazynier)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  stocktakeSessions StocktakeSession[]
+  movements         Movement[]
 }
 
 /// Durable catalog SKU. Barcode is Code128-compatible (alphanumeric).
-/// Stock quantity is never stored here — balances come from movements (later).
+/// Stock quantity is never stored here — balances come from movements.
 model CatalogItem {
-  id        String   @id @default(cuid())
-  sku       String   @unique
-  name      String
-  category  String
-  unit      String
-  barcode   String   @unique
-  photoPath String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String         @id @default(cuid())
+  sku           String         @unique
+  name          String
+  category      String
+  unit          String
+  barcode       String         @unique
+  photoPath     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  stocktakeLines StocktakeLine[]
+  movements     Movement[]
 
   @@index([name])
   @@index([category])
@@ -45,11 +60,67 @@ model CatalogItem {
 
 /// Flat hall location. `code` is the scannable Code128 value (unique).
 model Location {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  label     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(cuid())
+  code           String         @unique
+  label          String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  stocktakeLines StocktakeLine[]
+  movements      Movement[]
 
   @@index([label])
+}
+
+/// Physical stocktake session (`spis z natury`). Opening stock is posted only on approve.
+model StocktakeSession {
+  id          String          @id @default(cuid())
+  status      StocktakeStatus @default(draft)
+  note        String?
+  createdById String?
+  approvedAt  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  lines       StocktakeLine[]
+  movements   Movement[]
+  createdBy   User?           @relation(fields: [createdById], references: [id])
+
+  @@index([status])
+}
+
+model StocktakeLine {
+  id            String           @id @default(cuid())
+  sessionId     String
+  catalogItemId String
+  locationId    String
+  countedQty    Decimal          @db.Decimal(18, 3)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  session       StocktakeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  catalogItem   CatalogItem      @relation(fields: [catalogItemId], references: [id])
+  location      Location         @relation(fields: [locationId], references: [id])
+  movement      Movement?
+
+  @@unique([sessionId, catalogItemId, locationId])
+  @@index([sessionId])
+}
+
+/// Append-only stock movement. Opening rows are written by stocktake approval.
+model Movement {
+  id                 String            @id @default(cuid())
+  type               MovementType
+  catalogItemId      String
+  locationId         String
+  qty                Decimal           @db.Decimal(18, 3)
+  stocktakeSessionId String?
+  stocktakeLineId    String?           @unique
+  createdById        String?
+  createdAt          DateTime          @default(now())
+  catalogItem        CatalogItem       @relation(fields: [catalogItemId], references: [id])
+  location           Location          @relation(fields: [locationId], references: [id])
+  stocktakeSession   StocktakeSession? @relation(fields: [stocktakeSessionId], references: [id])
+  stocktakeLine      StocktakeLine?    @relation(fields: [stocktakeLineId], references: [id])
+  createdBy          User?             @relation(fields: [createdById], references: [id])
+
+  @@index([catalogItemId, locationId])
+  @@index([stocktakeSessionId])
 }

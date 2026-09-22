@@ -8,17 +8,17 @@
 
 ## NOW
 
-- F005 · Stocktake session → opening movements
+- F006 · Stock balances from movements
 
 ## NEXT
 
-- F006 · Stock balances from movements
 - F007 · Scanned receipt / transfer / issue
 - F008 · Architect shopping lists
 - F009 · Admin users and movement history
 
 ## PROVEN
 
+- F005 · Stocktake session → opening movements (draft/counting/approved; approve posts opening movements; stock = movement sum)
 - F004 · Locations (unique codes, admin CRUD, stub picker + Code128 label for F007)
 - F003 · Catalog + barcode (Code128 labels, searchable CRUD, optional photo, magazynier/admin write)
 - F002 · Auth and roles (credentials + magazynier/architekt/admin + Polish shell + sample 401/403)
