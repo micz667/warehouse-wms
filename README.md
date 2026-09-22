@@ -19,13 +19,20 @@ cp .env.example .env
 npm install
 ```
 
+Uzupełnij w `.env` wartość `AUTH_SECRET` (np. `openssl rand -base64 33`).
+
 ## Środowisko
 
-Skopiuj `.env.example` do `.env`. Domyślny connection string:
+Skopiuj `.env.example` do `.env`. Kluczowe placeholdery:
 
 ```
 DATABASE_URL="postgresql://warehouse:warehouse@localhost:5432/warehouse?schema=public"
+AUTH_SECRET="replace-with-a-long-random-string"
+SEED_ADMIN_EMAIL="admin@local"
+SEED_ADMIN_PASSWORD="change-me"
 ```
+
+Hasła z przykładu to wyłącznie placeholdery lokalne — nigdy nie używaj ich w środowisku współdzielonym.
 
 ## Postgres (Docker)
 
@@ -33,7 +40,10 @@ DATABASE_URL="postgresql://warehouse:warehouse@localhost:5432/warehouse?schema=p
 docker compose up -d
 npx prisma migrate deploy
 npx prisma generate
+npx prisma db seed
 ```
+
+Seed tworzy lokalnego administratora (`admin@local` / `change-me` domyślnie).
 
 ## Development
 
@@ -41,7 +51,7 @@ npx prisma generate
 npm run dev
 ```
 
-Aplikacja: [http://localhost:3000](http://localhost:3000) — polska strona-placeholder magazynu (bez auth).
+Aplikacja: [http://localhost:3000](http://localhost:3000) — bez sesji przekieruje na logowanie (PL).
 
 ## Sprawdzenie (check)
 
@@ -49,7 +59,15 @@ Aplikacja: [http://localhost:3000](http://localhost:3000) — polska strona-plac
 npm run check
 ```
 
-Uruchamia lint (ESLint), `tsc --noEmit` oraz `prisma validate`.
+Uruchamia lint (ESLint), `tsc --noEmit`, `prisma validate` oraz dowód bramki ról (`prove:gate-role`: 401 bez roli, 403 przy złej roli).
+
+Przy uruchomionym serwerze (`npm run build && npm start`) możesz też:
+
+```bash
+npm run prove:auth-http
+```
+
+— przekierowanie `/` → login, API sample: 401 / 403 / 200.
 
 ## Spec (Limen)
 
@@ -61,4 +79,4 @@ Uruchamia lint (ESLint), `tsc --noEmit` oraz `prisma validate`.
 
 Next.js App Router · Postgres · Prisma · Auth.js · Tailwind · PWA (kamera)
 
-Auth, katalog, stany i Symfonia — kolejne slice'y; stan magazynowy nigdy nie jest kolumną zapisywaną ad hoc.
+Katalog, stany i Symfonia — kolejne slice'y; stan magazynowy nigdy nie jest kolumną zapisywaną ad hoc.

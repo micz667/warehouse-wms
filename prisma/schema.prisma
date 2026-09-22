@@ -1,4 +1,4 @@
-// Prisma schema — warehouse WMS baseline.
+// Prisma schema — warehouse WMS.
 // Stock quantity must never be a writable ad-hoc column; balances come from movements (later).
 
 generator client {
@@ -10,4 +10,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Empty baseline: domain models land in later slices.
+enum Role {
+  magazynier
+  architekt
+  admin
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         Role     @default(magazynier)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
