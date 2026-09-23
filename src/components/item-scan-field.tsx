@@ -88,17 +88,16 @@ export function ItemScanField({ onSelect, selected }: Props) {
               }}
             />
           ) : null}
-          <form
-            className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void resolveBarcode(manual);
-            }}
-          >
+          <div className="flex gap-2">
             <input
               type="text"
               value={manual}
               onChange={(e) => setManual(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                void resolveBarcode(manual);
+              }}
               placeholder="Kod kreskowy (wpisz)…"
               className="min-w-0 flex-1 rounded border border-zinc-300 bg-white px-3 py-2 font-mono text-sm outline-none focus:border-zinc-500"
               aria-label="Kod kreskowy pozycji"
@@ -106,13 +105,14 @@ export function ItemScanField({ onSelect, selected }: Props) {
               disabled={pending}
             />
             <button
-              type="submit"
+              type="button"
               className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
               disabled={pending}
+              onClick={() => void resolveBarcode(manual)}
             >
               Użyj
             </button>
-          </form>
+          </div>
         </>
       )}
 
