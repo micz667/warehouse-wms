@@ -76,6 +76,31 @@ function main() {
   assert.match(scanner, /getUserMedia/);
   assert.match(scanner, /@zxing\/browser/);
 
+  // Nested <form> inside parent movement forms causes React hydration errors.
+  const itemScan = readFileSync(
+    join(process.cwd(), "src/components/item-scan-field.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(
+    itemScan,
+    /<form\b/,
+    "ItemScanField must not nest a <form> (used inside Receipt/Transfer/Issue forms)",
+  );
+  assert.match(itemScan, /onKeyDown/, "manual barcode Enter still handled");
+  assert.match(itemScan, /type="button"/, "Użyj is type=button, not submit");
+
+  const locationField = readFileSync(
+    join(process.cwd(), "src/components/location-field.tsx"),
+    "utf8",
+  );
+  assert.doesNotMatch(
+    locationField,
+    /<form\b/,
+    "LocationField must not nest a <form> (used inside Receipt/Transfer/Issue forms)",
+  );
+  assert.match(locationField, /onKeyDown/, "manual location Enter still handled");
+  assert.match(locationField, /type="button"/, "Użyj is type=button, not submit");
+
   const hub = readFileSync(
     join(process.cwd(), "src/app/ruchy/page.tsx"),
     "utf8",
