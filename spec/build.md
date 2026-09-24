@@ -10,16 +10,16 @@
 
 ## NOW
 
-- F015 · Wrong-movement correction and label reprint (storno / opposite movement; reprint/reattach)
+- F016 · Good return and return-to-renovation (shelf vs renovation → batch vendor issue)
 
 ## NEXT
 
-- F016 · Good return and return-to-renovation (shelf vs renovation → batch vendor issue)
 - F017 · Inventory session with variances (count → variances → approve correcting movements)
 - F018 · Emergency issue without signature (conscious, logged bypass)
 
 ## PROVEN
 
+- F015 · Wrong-movement correction and label reprint (storno / opposite movement; reprint/reattach)
 - F014 · Movement history on the product card (SKU history from card/hub; no admin required)
 - F013b · Cafe signature and receipt (finger-sign → issue movements; stock leaves)
 - F013a · Cafe issue prepare / build package (hall; prepared/in-transit; stock unchanged)
@@ -29,8 +29,7 @@
 - F009 · Admin users and movement history (create+role change; filtered audit on Movement ledger)
 - F008 · Architect shopping lists (draft→submit→checklist; architekt create; magazynier check-off; history)
 - F007 · Scanned receipt / transfer / issue (paired transfer rows; issue refuses negative; camera+manual scan)
-- F006 · Stock balances from movements (sumMovementQty; no raw qty column/UI; prove vs independent SUM)
 
 ## Earlier proven
 
-- 2026-09: F001 · App foundation; F002 · Auth and roles; F003 · Catalog + barcode; F004 · Locations; F005 · Stocktake opening
+- 2026-09: F001 · App foundation; F002 · Auth and roles; F003 · Catalog + barcode; F004 · Locations; F005 · Stocktake opening; F006 · Stock from movements

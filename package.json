@@ -28,6 +28,8 @@
     "prove:receive-scan-db": "tsx scripts/prove-receive-scan-db.ts",
     "prove:transfer-locate": "tsx scripts/prove-transfer-locate.ts",
     "prove:transfer-locate-db": "tsx scripts/prove-transfer-locate-db.ts",
+    "prove:correction": "tsx scripts/prove-correction.ts",
+    "prove:correction-db": "tsx scripts/prove-correction-db.ts",
     "prove:cafe-prepare": "tsx scripts/prove-cafe-prepare.ts",
     "prove:cafe-prepare-db": "tsx scripts/prove-cafe-prepare-db.ts",
     "prove:cafe-signature": "tsx scripts/prove-cafe-signature.ts",
@@ -38,7 +40,7 @@
     "prove:admin-audit-db": "tsx scripts/prove-admin-audit-db.ts",
     "prove:product-history": "tsx scripts/prove-product-history.ts",
     "prove:product-history-db": "tsx scripts/prove-product-history-db.ts",
-    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog && npm run prove:locations && npm run prove:stocktake && npm run prove:stocktake-db && npm run prove:stock-from-movements && npm run prove:stock-from-movements-db && npm run prove:scan-movements && npm run prove:scan-movements-db && npm run prove:scan-hub && npm run prove:receive-scan && npm run prove:receive-scan-db && npm run prove:transfer-locate && npm run prove:transfer-locate-db && npm run prove:cafe-prepare && npm run prove:cafe-prepare-db && npm run prove:cafe-signature && npm run prove:cafe-signature-db && npm run prove:shopping-lists && npm run prove:shopping-lists-db && npm run prove:admin-audit && npm run prove:admin-audit-db && npm run prove:product-history && npm run prove:product-history-db"
+    "check": "npm run lint && npm run typecheck && npm run prisma:validate && npm run prove:gate-role && npm run prove:catalog && npm run prove:locations && npm run prove:stocktake && npm run prove:stocktake-db && npm run prove:stock-from-movements && npm run prove:stock-from-movements-db && npm run prove:scan-movements && npm run prove:scan-movements-db && npm run prove:scan-hub && npm run prove:receive-scan && npm run prove:receive-scan-db && npm run prove:transfer-locate && npm run prove:transfer-locate-db && npm run prove:correction && npm run prove:correction-db && npm run prove:cafe-prepare && npm run prove:cafe-prepare-db && npm run prove:cafe-signature && npm run prove:cafe-signature-db && npm run prove:shopping-lists && npm run prove:shopping-lists-db && npm run prove:admin-audit && npm run prove:admin-audit-db && npm run prove:product-history && npm run prove:product-history-db"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
