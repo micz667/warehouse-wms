@@ -18,7 +18,13 @@ A magazynier (or admin) can storno a mistaken movement with an opposite row so b
 3. From an item, reprint opens the existing barcode label without a duplicate catalog row — `prove:correction` (card link → etykieta + `BarcodeLabel`) and DB prove (catalog count stays 1 for that barcode).
 4. After correction, stock equals independent `SUM(qty)` — `prove:correction-db` (`independentSum` vs `sumMovementQty`).
 
-`npm run check` evidence recorded at the clean candidate commit in this PR.
+`npm run check` on clean candidate `9af535d` (working tree clean):
+
+```
+prove-correction: ok (storno seam · write roles · history Popraw · label reprint)
+prove-correction-db: ok (storno · original kept · independent SUM · no duplicate SKU)
+… full native lane green (lint · typecheck · prisma validate · all prior proves) …
+```
 
 ## Key routes / seams
 
