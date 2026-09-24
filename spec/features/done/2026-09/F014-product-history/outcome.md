@@ -16,12 +16,12 @@ From a product card or hub item scan, a hall/warehouse user opens **Historia** a
 2. Movements from receipt, transfer, issue, and opening stocktake for that item all appear when present — same DB prove (types + both transfer legs; other SKUs excluded).
 3. Reachable from hall Historia tile or product card without admin role — hub tile `/ruchy/historia`, hub gesture + `catalog-history-link`; historia page has no `MOVEMENT_AUDIT_ROLES` gate; product-only API filter is read-role.
 
-`npm run check` on clean candidate _(pending — filled after native lane)_:
+`npm run check` on clean candidate `a64c3be` (working tree clean):
 
 ```
 prove-product-history: ok (product filter read · hub/card reach · list seams)
 prove-product-history-db: ok (opening/receipt/transfer/issue · newest-first · SKU filter)
-… full native lane …
+… full native lane green (lint · typecheck · prisma validate · all prior proves) …
 ```
 
 ## Key routes / seams
