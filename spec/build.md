@@ -10,11 +10,10 @@
 
 ## NOW
 
-- F013b · Cafe signature and receipt
+- F014 · Movement history on the product card
 
 ## NEXT
 
-- F014 · Movement history on the product card
 - F015 · Wrong-movement correction and label reprint (storno / opposite movement; reprint/reattach)
 - F016 · Good return and return-to-renovation (shelf vs renovation → batch vendor issue)
 - F017 · Inventory session with variances (count → variances → approve correcting movements)
@@ -22,6 +21,7 @@
 
 ## PROVEN
 
+- F013b · Cafe signature and receipt (finger-sign → issue movements; stock leaves)
 - F013a · Cafe issue prepare / build package (hall; prepared/in-transit; stock unchanged)
 - F012 · Shelf transfer and where-is lookup (shelf↔shelf; stock+locations for an item)
 - F011 · Receive by scan with inline catalog add (unknown barcode → POC create, then receipt)
@@ -31,8 +31,7 @@
 - F007 · Scanned receipt / transfer / issue (paired transfer rows; issue refuses negative; camera+manual scan)
 - F006 · Stock balances from movements (sumMovementQty; no raw qty column/UI; prove vs independent SUM)
 - F005 · Stocktake session → opening movements (draft/counting/approved; approve posts opening movements; stock = movement sum)
-- F004 · Locations (unique codes, admin CRUD, stub picker + Code128 label for F007)
 
 ## Earlier proven
 
-- 2026-09: F001 · App foundation; F002 · Auth and roles; F003 · Catalog + barcode
+- 2026-09: F001 · App foundation; F002 · Auth and roles; F003 · Catalog + barcode; F004 · Locations

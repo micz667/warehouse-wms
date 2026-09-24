@@ -98,6 +98,7 @@ function main() {
   );
   assert.match(detail, /cafe-issue-detail/);
   assert.match(detail, /getCafeIssue/);
+  assert.match(detail, /CafeSignaturePad/);
   assert.doesNotMatch(detail, /postIssue|\/api\/movements\/issue/);
 
   const hub = readFileSync(

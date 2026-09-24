@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
+import { CafeSignaturePad } from "@/components/cafe-signature-pad";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { CAFE_ISSUE_STATUS_LABEL_PL } from "@/lib/cafe-issue-labels";
 import { getCafeIssue } from "@/server/cafe-issues/get-cafe-issue";
-import { CAFE_ISSUE_READ_ROLES } from "@/server/cafe-issues/roles";
+import {
+  CAFE_ISSUE_READ_ROLES,
+  CAFE_ISSUE_WRITE_ROLES,
+} from "@/server/cafe-issues/roles";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -20,9 +24,18 @@ export default async function CafeIssueDetailPage({ params }: PageProps) {
     redirect("/");
   }
 
+  const canSign = (CAFE_ISSUE_WRITE_ROLES as readonly string[]).includes(
+    session.user.role,
+  );
+
   const { id } = await params;
   const doc = await getCafeIssue(prisma, id);
   if (!doc) notFound();
+
+  const signerLabel =
+    doc.signedBy?.name?.trim() ||
+    doc.signedBy?.email ||
+    (doc.signedById ? doc.signedById : null);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -63,13 +76,59 @@ export default async function CafeIssueDetailPage({ params }: PageProps) {
           ))}
         </ul>
 
-        <p
-          className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
-          role="status"
-        >
-          Stan magazynu nie został jeszcze obniżony. Podpis odbioru (zejście ze
-          stanu) — w kolejnym kroku.
-        </p>
+        {doc.status === "prepared" ? (
+          <>
+            <p
+              className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+              role="status"
+            >
+              Stan magazynu nie został jeszcze obniżony. Podpis odbioru odejmie
+              ilości z półek źródłowych.
+            </p>
+            <CafeSignaturePad cafeIssueId={doc.id} canSign={canSign} />
+          </>
+        ) : (
+          <section
+            className="space-y-3"
+            data-testid="cafe-signature-receipt"
+            aria-label="Potwierdzenie podpisu"
+          >
+            <p
+              className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-950"
+              role="status"
+            >
+              Odbiór podpisany — wydania zapisane, stan magazynu obniżony.
+            </p>
+            <dl className="space-y-1 text-sm text-zinc-700">
+              <div className="flex justify-between gap-4">
+                <dt className="text-zinc-500">Podpisał</dt>
+                <dd className="font-medium text-zinc-900" data-testid="cafe-signed-by">
+                  {signerLabel ?? "—"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-zinc-500">Czas podpisu</dt>
+                <dd
+                  className="font-medium text-zinc-900"
+                  data-testid="cafe-signed-at"
+                >
+                  {doc.signedAt
+                    ? doc.signedAt.toLocaleString("pl-PL")
+                    : "—"}
+                </dd>
+              </div>
+            </dl>
+            {doc.signatureData ? (
+              // eslint-disable-next-line @next/next/no-img-element -- stored data URL
+              <img
+                src={doc.signatureData}
+                alt="Podpis odbioru"
+                className="mt-2 w-full rounded border border-zinc-200 bg-white"
+                data-testid="cafe-signature-image"
+              />
+            ) : null}
+          </section>
+        )}
 
         <p className="text-sm">
           <Link href="/ruchy/wydanie" className="underline hover:text-zinc-900">

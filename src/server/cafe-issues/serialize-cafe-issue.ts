@@ -3,6 +3,7 @@ import type {
   CafeIssueLine,
   CatalogItem,
   Location,
+  User,
 } from "@prisma/client";
 
 export type CafeIssueLineWithRefs = CafeIssueLine & {
@@ -16,6 +17,7 @@ export type CafeIssueLineWithRefs = CafeIssueLine & {
 export type CafeIssueWithDetails = CafeIssue & {
   cafeLocation: Pick<Location, "id" | "code" | "label">;
   lines: CafeIssueLineWithRefs[];
+  signedBy?: Pick<User, "id" | "name" | "email"> | null;
   _count?: { lines: number };
 };
 
@@ -29,6 +31,16 @@ export function serializeCafeIssue(doc: CafeIssueWithDetails) {
     createdAt: doc.createdAt.toISOString(),
     updatedAt: doc.updatedAt.toISOString(),
     createdById: doc.createdById,
+    signatureData: doc.signatureData,
+    signedAt: doc.signedAt ? doc.signedAt.toISOString() : null,
+    signedById: doc.signedById,
+    signedBy: doc.signedBy
+      ? {
+          id: doc.signedBy.id,
+          name: doc.signedBy.name,
+          email: doc.signedBy.email,
+        }
+      : null,
     cafeLocation: doc.cafeLocation,
     lines: doc.lines.map((line) => ({
       id: line.id,
