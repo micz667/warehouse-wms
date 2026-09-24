@@ -22,10 +22,12 @@ function main() {
   ]);
   assert.deepEqual(missingFieldsAfterHubScan("item", "wydaj"), [
     "location",
+    "cafe",
     "qty",
   ]);
   assert.deepEqual(missingFieldsAfterHubScan("location", "wydaj"), [
     "item",
+    "cafe",
     "qty",
   ]);
   assert.deepEqual(missingFieldsAfterHubScan("item", "przenies"), [

@@ -38,6 +38,12 @@ enum ShoppingListStatus {
   done
 }
 
+/// Cafe issue document. Prepare (F013a) leaves stock unchanged; signature
+/// posts issue movements later (F013b). `prepared` = in-transit / awaiting sign.
+enum CafeIssueStatus {
+  prepared
+}
+
 model User {
   id                   String             @id @default(cuid())
   email                String             @unique
@@ -50,6 +56,7 @@ model User {
   movements            Movement[]
   shoppingLists        ShoppingList[]
   shoppingListChecks   ShoppingListLine[] @relation("ShoppingListLineCheckedBy")
+  cafeIssues           CafeIssue[]
 }
 
 /// Durable catalog SKU. Barcode is Code128-compatible (alphanumeric).
@@ -66,9 +73,10 @@ model CatalogItem {
   photoPath        String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
-  stocktakeLines   StocktakeLine[]
-  movements        Movement[]
+  stocktakeLines    StocktakeLine[]
+  movements         Movement[]
   shoppingListLines ShoppingListLine[]
+  cafeIssueLines    CafeIssueLine[]
 
   @@index([name])
   @@index([category])
@@ -76,13 +84,15 @@ model CatalogItem {
 
 /// Flat hall location. `code` is the scannable Code128 value (unique).
 model Location {
-  id             String         @id @default(cuid())
-  code           String         @unique
-  label          String
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  stocktakeLines StocktakeLine[]
-  movements      Movement[]
+  id                  String          @id @default(cuid())
+  code                String          @unique
+  label               String
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  stocktakeLines      StocktakeLine[]
+  movements           Movement[]
+  cafeIssuesAsCafe    CafeIssue[]     @relation("CafeIssueCafeLocation")
+  cafeIssueLineSources CafeIssueLine[] @relation("CafeIssueLineSource")
 
   @@index([label])
 }
@@ -176,4 +186,39 @@ model ShoppingListLine {
 
   @@unique([listId, catalogItemId])
   @@index([listId])
+}
+
+/// Hall-prepared cafe shipment. Stock leaves only after signature (F013b).
+model CafeIssue {
+  id             String          @id @default(cuid())
+  status         CafeIssueStatus @default(prepared)
+  cafeLocationId String
+  note           String?
+  createdById    String?
+  preparedAt     DateTime        @default(now())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  lines          CafeIssueLine[]
+  cafeLocation   Location        @relation("CafeIssueCafeLocation", fields: [cafeLocationId], references: [id])
+  createdBy      User?           @relation(fields: [createdById], references: [id])
+
+  @@index([status])
+  @@index([preparedAt])
+  @@index([cafeLocationId])
+}
+
+model CafeIssueLine {
+  id               String     @id @default(cuid())
+  cafeIssueId      String
+  catalogItemId    String
+  sourceLocationId String
+  qty              Decimal    @db.Decimal(18, 3)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  cafeIssue        CafeIssue  @relation(fields: [cafeIssueId], references: [id], onDelete: Cascade)
+  catalogItem      CatalogItem @relation(fields: [catalogItemId], references: [id])
+  sourceLocation   Location   @relation("CafeIssueLineSource", fields: [sourceLocationId], references: [id])
+
+  @@unique([cafeIssueId, catalogItemId, sourceLocationId])
+  @@index([cafeIssueId])
 }

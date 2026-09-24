@@ -1,8 +1,8 @@
 import { AppHeader } from "@/components/app-header";
-import { IssueForm } from "@/components/issue-form";
+import { CafePrepareForm } from "@/components/cafe-prepare-form";
 import { auth } from "@/auth";
 import { loadHubPrefill } from "@/lib/load-hub-prefill";
-import { MOVEMENT_WRITE_ROLES } from "@/server/movements/roles";
+import { CAFE_ISSUE_WRITE_ROLES } from "@/server/cafe-issues/roles";
 import { redirect } from "next/navigation";
 
 type PageProps = {
@@ -19,7 +19,7 @@ export default async function WydaniePage({ searchParams }: PageProps) {
     redirect("/login");
   }
 
-  const canWrite = (MOVEMENT_WRITE_ROLES as readonly string[]).includes(
+  const canWrite = (CAFE_ISSUE_WRITE_ROLES as readonly string[]).includes(
     session.user.role,
   );
   const params = await searchParams;
@@ -27,11 +27,11 @@ export default async function WydaniePage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <AppHeader title="Wydanie" />
-      <IssueForm
+      <AppHeader title="Wydanie do kawiarni" />
+      <CafePrepareForm
         canWrite={canWrite}
         initialItem={prefill.item}
-        initialLocation={prefill.location}
+        initialSource={prefill.location}
         fromHub={prefill.fromHub}
       />
     </div>

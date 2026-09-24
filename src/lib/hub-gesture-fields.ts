@@ -12,6 +12,7 @@ export type HubField =
   | "location"
   | "fromLocation"
   | "toLocation"
+  | "cafe"
   | "qty";
 
 /** Fields the UI must still collect to finish the gesture. */
@@ -24,8 +25,9 @@ export function missingFieldsAfterHubScan(
       if (scanKind === "item") return ["location", "qty"];
       return ["item", "qty"];
     case "wydaj":
-      if (scanKind === "item") return ["location", "qty"];
-      return ["item", "qty"];
+      // Cafe prepare: document needs cafe destination + at least one line.
+      if (scanKind === "item") return ["location", "cafe", "qty"];
+      return ["item", "cafe", "qty"];
     case "przenies":
       if (scanKind === "item") return ["fromLocation", "toLocation", "qty"];
       // Location scan prefills source; still need destination (+ item + qty).
