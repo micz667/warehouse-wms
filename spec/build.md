@@ -10,14 +10,15 @@
 
 ## NOW
 
-- F017 · Inventory session with variances (count → variances → approve correcting movements)
+- F018 · Emergency issue without signature (conscious, logged bypass)
 
 ## NEXT
 
-- F018 · Emergency issue without signature (conscious, logged bypass)
+- (board empty — post-MVP hall UX slice complete after F018)
 
 ## PROVEN
 
+- F017 · Inventory session with variances (count → variances → approve correcting movements)
 - F016 · Good return and return-to-renovation (shelf vs renovation → batch vendor issue)
 - F015 · Wrong-movement correction and label reprint (storno / opposite movement; reprint/reattach)
 - F014 · Movement history on the product card (SKU history from card/hub; no admin required)
@@ -27,8 +28,7 @@
 - F011 · Receive by scan with inline catalog add (unknown barcode → POC create, then receipt)
 - F010 · Magazynier lands on scan hub and process tiles (scan-first + Przyjmij / Wydaj / Przenieś / Historia)
 - F009 · Admin users and movement history (create+role change; filtered audit on Movement ledger)
-- F008 · Architect shopping lists (draft→submit→checklist; architekt create; magazynier check-off; history)
 
 ## Earlier proven
 
-- 2026-09: F001 · App foundation; F002 · Auth and roles; F003 · Catalog + barcode; F004 · Locations; F005 · Stocktake opening; F006 · Stock from movements; F007 · Scanned receipt / transfer / issue
+- 2026-09: F001 · App foundation; F002 · Auth and roles; F003 · Catalog + barcode; F004 · Locations; F005 · Stocktake opening; F006 · Stock from movements; F007 · Scanned receipt / transfer / issue; F008 · Architect shopping lists
