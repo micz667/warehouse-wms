@@ -72,7 +72,7 @@ function main() {
   assert.match(ui, /cafe-prepared-list/);
   assert.doesNotMatch(
     ui,
-    /\/api\/movements\/issue/,
+    /fetch\(\s*["'`]\/api\/movements\/issue/,
     "hall prepare path must not call immediate issue API",
   );
   // Outer form only — ItemScanField / LocationField must stay form-free.

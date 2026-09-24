@@ -36,7 +36,7 @@ type Props = {
 
 /**
  * Hall Wydaj: build a multi-line cafe package, then prepare (in-transit).
- * Does not call /api/movements/issue — stock stays until F013b signature.
+ * Stock stays until F013b signature — this form only POSTs cafe-issues.
  */
 export function CafePrepareForm({
   canWrite,
@@ -72,10 +72,7 @@ export function CafePrepareForm({
   }, [loadPrepared]);
 
   useEffect(() => {
-    if (!item || !source) {
-      setAvailable(null);
-      return;
-    }
+    if (!item || !source) return;
     let cancelled = false;
     void (async () => {
       const res = await fetch(`/api/stock/item/${encodeURIComponent(item.id)}`);
@@ -231,7 +228,10 @@ export function CafePrepareForm({
               <button
                 type="button"
                 className="ml-2 text-xs underline"
-                onClick={() => setItem(null)}
+                onClick={() => {
+                  setItem(null);
+                  setAvailable(null);
+                }}
               >
                 Zmień
               </button>
@@ -241,6 +241,7 @@ export function CafePrepareForm({
               selected={item}
               onSelect={(next) => {
                 setItem(next);
+                setAvailable(null);
                 setOk(null);
               }}
             />
@@ -257,7 +258,10 @@ export function CafePrepareForm({
               <button
                 type="button"
                 className="ml-2 text-xs underline"
-                onClick={() => setSource(null)}
+                onClick={() => {
+                  setSource(null);
+                  setAvailable(null);
+                }}
               >
                 Zmień
               </button>
@@ -268,6 +272,7 @@ export function CafePrepareForm({
               selected={source}
               onSelect={(loc) => {
                 setSource(loc);
+                setAvailable(null);
                 setOk(null);
               }}
             />
