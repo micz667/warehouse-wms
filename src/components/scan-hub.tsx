@@ -61,7 +61,9 @@ const FIELD_LABEL_PL: Record<string, string> = {
  */
 export function ScanHub() {
   const [manual, setManual] = useState("");
-  const [cameraOn, setCameraOn] = useState(true);
+  // Camera off by default so process tiles + shortcuts fit the first viewport;
+  // hall user turns it on when ready to scan.
+  const [cameraOn, setCameraOn] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resolved, setResolved] = useState<ResolvedScan | null>(null);
