@@ -114,8 +114,9 @@ export function CatalogEditForm({ item, canWrite }: Props) {
           <Link
             href={`/katalog/${item.id}/etykieta`}
             className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
+            data-testid="catalog-reprint-label"
           >
-            Etykieta
+            Etykieta / przedruk
           </Link>
         </div>
       </div>

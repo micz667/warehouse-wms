@@ -5,6 +5,10 @@ export type RecentMovementRow = {
   type: string;
   qty: string;
   createdAt: Date;
+  /** Id of the mistaken row this correction reverses (F015). */
+  correctsMovementId: string | null;
+  /** True when another row already stornos this one (F015). */
+  hasCorrection: boolean;
   catalogItem: { id: string; sku: string; name: string; barcode: string };
   location: { id: string; code: string; label: string };
   createdBy: { id: string; email: string; name: string | null } | null;
@@ -72,6 +76,7 @@ export async function listRecentMovements(
       },
       location: { select: { id: true, code: true, label: true } },
       createdBy: { select: { id: true, email: true, name: true } },
+      correctedBy: { select: { id: true } },
     },
   });
 
@@ -80,6 +85,8 @@ export async function listRecentMovements(
     type: row.type,
     qty: row.qty.toString(),
     createdAt: row.createdAt,
+    correctsMovementId: row.correctsMovementId,
+    hasCorrection: Boolean(row.correctedBy),
     catalogItem: row.catalogItem,
     location: row.location,
     createdBy: row.createdBy,

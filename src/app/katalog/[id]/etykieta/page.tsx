@@ -41,9 +41,12 @@ export default async function KatalogEtykietaPage({ params }: Props) {
         <p className="mt-1 text-sm text-zinc-600">
           {item.sku} · {item.category} · {item.unit}
         </p>
-        <div className="mt-8 rounded border border-zinc-200 bg-white p-6">
+        <div className="mt-8 rounded border border-zinc-200 bg-white p-6" data-testid="catalog-label-barcode">
           <BarcodeLabel value={item.barcode} height={72} />
         </div>
+        <p className="mt-4 max-w-sm text-center text-xs text-zinc-500 print:hidden">
+          Przedruk etykiety dla istniejącego kodu — bez tworzenia nowej pozycji katalogu.
+        </p>
       </main>
     </div>
   );

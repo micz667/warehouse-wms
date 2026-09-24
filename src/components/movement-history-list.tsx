@@ -7,6 +7,7 @@ const TYPE_LABEL_PL: Record<string, string> = {
   receipt: "Przyjęcie",
   issue: "Wydanie",
   transfer: "Przesunięcie",
+  correction: "Korekta",
 };
 
 type MovementRow = {
@@ -14,6 +15,8 @@ type MovementRow = {
   type: string;
   qty: string;
   createdAt: string;
+  correctsMovementId: string | null;
+  hasCorrection: boolean;
   catalogItem: { id: string; sku: string; name: string };
   location: { id: string; code: string; label: string };
   createdBy: { id: string; email: string; name: string | null } | null;
@@ -47,6 +50,8 @@ export function MovementHistoryList({
   const [rows, setRows] = useState<MovementRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [correctingId, setCorrectingId] = useState<string | null>(null);
+  const [correctMessage, setCorrectMessage] = useState<string | null>(null);
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -135,6 +140,30 @@ export function MovementHistoryList({
       cancelled = true;
     };
   }, [showFilters]);
+
+  async function onCorrect(movementId: string) {
+    setCorrectingId(movementId);
+    setError(null);
+    setCorrectMessage(null);
+    try {
+      const res = await fetch("/api/movements/correct", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ movementId }),
+      });
+      const body = (await res.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      if (!res.ok) {
+        setError(body?.error ?? "Nie udało się zapisać korekty");
+        return;
+      }
+      setCorrectMessage("Zapisano korektę (storno) — pierwotny ruch pozostaje w historii.");
+      load();
+    } finally {
+      setCorrectingId(null);
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-8">
@@ -291,6 +320,11 @@ export function MovementHistoryList({
           {error}
         </p>
       ) : null}
+      {correctMessage ? (
+        <p className="mt-4 text-sm text-emerald-800" role="status">
+          {correctMessage}
+        </p>
+      ) : null}
 
       <ul className="mt-6 divide-y divide-zinc-200 border-t border-zinc-200">
         {rows.length === 0 && !pending ? (
@@ -304,6 +338,10 @@ export function MovementHistoryList({
             row.createdBy?.email ||
             "—";
           const when = new Date(row.createdAt).toLocaleString("pl-PL");
+          const canCorrect =
+            row.type !== "correction" &&
+            !row.correctsMovementId &&
+            !row.hasCorrection;
           return (
             <li key={row.id} className="py-4" data-testid="movement-row">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -326,7 +364,35 @@ export function MovementHistoryList({
               </p>
               <p className="mt-0.5 text-xs text-zinc-500">
                 Wykonał: {actor}
+                {row.correctsMovementId
+                  ? ` · storno ruchu ${row.correctsMovementId.slice(0, 8)}…`
+                  : null}
+                {row.hasCorrection ? " · skorygowany" : null}
               </p>
+              {canCorrect ? (
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    data-testid="correct-movement"
+                    className="rounded border border-zinc-300 bg-white px-3 py-1 text-xs text-zinc-800 hover:bg-zinc-100 disabled:opacity-50"
+                    disabled={correctingId === row.id || pending}
+                    onClick={() => {
+                      if (
+                        !window.confirm(
+                          "Zapisać korektę (storno) tego ruchu? Pierwotny wpis zostanie w historii.",
+                        )
+                      ) {
+                        return;
+                      }
+                      void onCorrect(row.id);
+                    }}
+                  >
+                    {correctingId === row.id
+                      ? "Zapisywanie…"
+                      : "Popraw ten ruch"}
+                  </button>
+                </div>
+              ) : null}
             </li>
           );
         })}
