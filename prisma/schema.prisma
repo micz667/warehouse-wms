@@ -39,9 +39,10 @@ enum ShoppingListStatus {
 }
 
 /// Cafe issue document. Prepare (F013a) leaves stock unchanged; signature
-/// posts issue movements later (F013b). `prepared` = in-transit / awaiting sign.
+/// (F013b) posts issue movements. `prepared` = in-transit; `received` = signed.
 enum CafeIssueStatus {
   prepared
+  received
 }
 
 model User {
@@ -56,7 +57,8 @@ model User {
   movements            Movement[]
   shoppingLists        ShoppingList[]
   shoppingListChecks   ShoppingListLine[] @relation("ShoppingListLineCheckedBy")
-  cafeIssues           CafeIssue[]
+  cafeIssues           CafeIssue[]        @relation("CafeIssueCreatedBy")
+  cafeIssuesSigned     CafeIssue[]        @relation("CafeIssueSignedBy")
 }
 
 /// Durable catalog SKU. Barcode is Code128-compatible (alphanumeric).
@@ -196,15 +198,21 @@ model CafeIssue {
   note           String?
   createdById    String?
   preparedAt     DateTime        @default(now())
+  /// Finger signature PNG data URL; set only on successful sign (F013b).
+  signatureData  String?
+  signedAt       DateTime?
+  signedById     String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   lines          CafeIssueLine[]
   cafeLocation   Location        @relation("CafeIssueCafeLocation", fields: [cafeLocationId], references: [id])
-  createdBy      User?           @relation(fields: [createdById], references: [id])
+  createdBy      User?           @relation("CafeIssueCreatedBy", fields: [createdById], references: [id])
+  signedBy       User?           @relation("CafeIssueSignedBy", fields: [signedById], references: [id])
 
   @@index([status])
   @@index([preparedAt])
   @@index([cafeLocationId])
+  @@index([signedAt])
 }
 
 model CafeIssueLine {

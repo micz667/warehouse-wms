@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 
 /**
- * Load one cafe issue with lines for reopen / F013b signature pickup.
+ * Load one cafe issue with lines (+ signer) for reopen / signature / receipt.
  */
 export async function getCafeIssue(db: PrismaClient, id: string) {
   if (!id.trim()) return null;
@@ -11,6 +11,9 @@ export async function getCafeIssue(db: PrismaClient, id: string) {
     include: {
       cafeLocation: {
         select: { id: true, code: true, label: true },
+      },
+      signedBy: {
+        select: { id: true, name: true, email: true },
       },
       lines: {
         orderBy: { createdAt: "asc" },

@@ -163,7 +163,7 @@ export function CafePrepareForm({
         setError(body?.error ?? "Nie udało się przygotować paczki");
         return;
       }
-      setOk("Paczka przygotowana — stan magazynu bez zmian do podpisu.");
+      setOk("Paczka przygotowana — otwórz ją na miejscu i zbierz podpis odbioru.");
       setLines([]);
       setNote("");
       loadPrepared();
@@ -186,7 +186,7 @@ export function CafePrepareForm({
         <p className="mt-1 text-zinc-600">
           {fromHub && (initialItem || initialSource)
             ? `Buduj paczkę — brakuje: ${missing.join(", ") || "potwierdzenia"}.`
-            : "Skan / katalog → ilości → kawiarnia. Przygotowanie nie zmienia stanów — podpis jest później."}
+            : "Skan / katalog → ilości → kawiarnia. Przygotowanie nie zmienia stanów — podpis na miejscu odejmie stan."}
         </p>
       </div>
 
@@ -373,8 +373,8 @@ export function CafePrepareForm({
           {pending ? "Przygotowywanie…" : "Przygotuj paczkę"}
         </button>
         <p className="text-xs text-zinc-500">
-          Przygotowanie nie odejmuje stanu. Podpis i zejście ze stanu — osobny
-          krok (F013b).
+          Przygotowanie nie odejmuje stanu. Otwórz paczkę na liście i zbierz
+          podpis odbioru, żeby zejść ze stanu.
         </p>
       </form>
 
