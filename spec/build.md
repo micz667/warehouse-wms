@@ -10,11 +10,10 @@
 
 ## NOW
 
-- F011 · Receive by scan with inline catalog add (unknown barcode → POC-style create, then finish receive)
+- F012 · Shelf transfer and where-is lookup (shelf↔shelf; stock+locations for an item)
 
 ## NEXT
 
-- F012 · Shelf transfer and where-is lookup (shelf↔shelf; stock+locations for an item)
 - F013 · Two-step cafe issue with signature (hall prepare → on-site finger signature → stock leaves)
 - F014 · Movement history on the product card
 - F015 · Wrong-movement correction and label reprint (storno / opposite movement; reprint/reattach)
@@ -24,6 +23,7 @@
 
 ## PROVEN
 
+- F011 · Receive by scan with inline catalog add (unknown barcode → POC create, then receipt)
 - F010 · Magazynier lands on scan hub and process tiles (scan-first + Przyjmij / Wydaj / Przenieś / Historia)
 - F009 · Admin users and movement history (create+role change; filtered audit on Movement ledger)
 - F008 · Architect shopping lists (draft→submit→checklist; architekt create; magazynier check-off; history)

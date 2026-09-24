@@ -1,13 +1,16 @@
 import type { CatalogItem, PrismaClient } from "@prisma/client";
+import { skuFromScannedBarcode } from "@/lib/sku-from-scanned-barcode";
 import { generateBarcodeValue } from "./generate-barcode";
 
 export type CreateCatalogItemInput = {
-  sku: string;
+  /** Required unless `barcode` is set — then a receive-style SKU is derived. */
+  sku?: string;
   name: string;
   category: string;
   unit: string;
+  description?: string | null;
   photoPath?: string | null;
-  /** Override only for tests or import; production create auto-generates. */
+  /** Override only for tests, import, or hall inline create (F011). */
   barcode?: string;
 };
 
@@ -31,10 +34,17 @@ export async function createCatalogItem(
   db: PrismaClient,
   input: CreateCatalogItemInput,
 ): Promise<CreateCatalogItemResult> {
-  const sku = trimRequired(input.sku);
   const name = trimRequired(input.name);
   const category = trimRequired(input.category);
   const unit = trimRequired(input.unit);
+  const description =
+    typeof input.description === "string" ? input.description.trim() : "";
+  const descriptionValue = description.length > 0 ? description : null;
+
+  let sku = trimRequired(input.sku);
+  if (!sku && input.barcode?.trim()) {
+    sku = skuFromScannedBarcode(input.barcode);
+  }
 
   if (!sku || !name || !category || !unit) {
     return {
@@ -70,6 +80,7 @@ export async function createCatalogItem(
           category,
           unit,
           barcode,
+          description: descriptionValue,
           photoPath: input.photoPath ?? null,
         },
       });
@@ -93,6 +104,7 @@ export async function createCatalogItem(
           category,
           unit,
           barcode,
+          description: descriptionValue,
           photoPath: input.photoPath ?? null,
         },
       });

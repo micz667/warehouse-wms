@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { InlineCatalogCreate } from "@/components/inline-catalog-create";
 import {
   ItemScanField,
   type ScannedCatalogItem,
@@ -25,6 +26,7 @@ export function ReceiptForm({
   const [location, setLocation] = useState<PickedLocation | null>(
     initialLocation,
   );
+  const [unknownBarcode, setUnknownBarcode] = useState<string | null>(null);
   const [qty, setQty] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
@@ -68,6 +70,10 @@ export function ReceiptForm({
   if (!location) missing.push("lokalizację");
   if (!qty.trim()) missing.push("ilość");
 
+  const showPrefillItem = Boolean(initialItem && fromHub && item);
+  const showScan =
+    !showPrefillItem && (!unknownBarcode || Boolean(item));
+
   return (
     <form className="mx-auto w-full max-w-lg space-y-6 px-6 py-8" onSubmit={submit}>
       <div>
@@ -87,7 +93,7 @@ export function ReceiptForm({
         </p>
       ) : null}
 
-      {initialItem && fromHub && item ? (
+      {showPrefillItem && item ? (
         <div
           className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
           data-testid="picked-item"
@@ -98,15 +104,40 @@ export function ReceiptForm({
             ({item.sku} · {item.barcode})
           </span>
         </div>
-      ) : (
+      ) : null}
+
+      {showScan ? (
         <ItemScanField
           selected={item}
           onSelect={(next) => {
             setItem(next);
+            setUnknownBarcode(null);
             setOk(null);
           }}
+          onUnknownBarcode={
+            canWrite
+              ? (code) => {
+                  setItem(null);
+                  setUnknownBarcode(code);
+                  setOk(null);
+                  setError(null);
+                }
+              : undefined
+          }
         />
-      )}
+      ) : null}
+
+      {unknownBarcode && !item ? (
+        <InlineCatalogCreate
+          barcode={unknownBarcode}
+          onCreated={(created) => {
+            setItem(created);
+            setUnknownBarcode(null);
+            setOk(null);
+          }}
+          onCancel={() => setUnknownBarcode(null)}
+        />
+      ) : null}
 
       {initialLocation && fromHub && location ? (
         <div
