@@ -18,12 +18,12 @@ A magazynier builds a **paczka do kawiarni** from Wydaj / hub: scan or catalog �
 3. Prepared documents are listable and openable — same DB prove + `/ruchy/wydanie` list and `/ruchy/wydanie/[id]`.
 4. This path alone cannot post stock-leaving issue movements — prepare creates zero `issue` Movement rows; hall UI POSTs only `/api/cafe-issues`.
 
-`npm run check` on clean candidate (see follow-up commit SHA in board update):
+`npm run check` on clean candidate `ab49cae` (working tree clean):
 
 ```
 prove-cafe-prepare: ok (roles · prepare no Movement · hall seams · list/reopen · no nested form)
 prove-cafe-prepare-db: ok (prepared doc · stock unchanged · list/open · no issue movements)
-… full native lane green …
+… full native lane green (lint · typecheck · prisma validate · all prior proves) …
 ```
 
 ## Key routes / seams
