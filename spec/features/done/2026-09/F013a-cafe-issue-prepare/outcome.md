@@ -18,7 +18,7 @@ A magazynier builds a **paczka do kawiarni** from Wydaj / hub: scan or catalog �
 3. Prepared documents are listable and openable — same DB prove + `/ruchy/wydanie` list and `/ruchy/wydanie/[id]`.
 4. This path alone cannot post stock-leaving issue movements — prepare creates zero `issue` Movement rows; hall UI POSTs only `/api/cafe-issues`.
 
-`npm run check` on clean candidate `ab49cae` (working tree clean):
+`npm run check` on clean candidate `09dc7ed` (rebased onto main `bcfa848`; working tree clean):
 
 ```
 prove-cafe-prepare: ok (roles · prepare no Movement · hall seams · list/reopen · no nested form)
@@ -36,5 +36,5 @@ prove-cafe-prepare-db: ok (prepared doc · stock unchanged · list/open · no is
 
 ## Notes
 
-- Out of scope held: finger signature / stock leave (F013b), emergency issue (F018), returns, renovation, Symfonia.
+- Out of scope held: finger signature / stock leave (`planned/F013b-cafe-signature-receipt`), emergency issue (F018), returns, renovation, Symfonia.
 - Next: F013b picks up prepared docs for signature + issue movements.
