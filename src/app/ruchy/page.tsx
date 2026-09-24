@@ -25,8 +25,8 @@ const FLOWS = [
   },
   {
     href: "/ruchy/wydanie",
-    title: "Wydanie",
-    blurb: "Z lokalizacji — odmawia przy ujemnym stanie.",
+    title: "Wydanie do kawiarni",
+    blurb: "Przygotuj paczkę — stan zejdzie dopiero po podpisie.",
   },
   {
     href: "/ruchy/historia",

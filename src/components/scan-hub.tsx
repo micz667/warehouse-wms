@@ -24,7 +24,7 @@ const PROCESS_TILES = [
   {
     href: "/ruchy/wydanie",
     title: "Wydaj",
-    blurb: "Towar z lokalizacji.",
+    blurb: "Paczka do kawiarni.",
   },
   {
     href: "/ruchy/przesuniecie",
@@ -57,9 +57,10 @@ const GESTURE_CHOICES: {
 
 const FIELD_LABEL_PL: Record<string, string> = {
   item: "pozycję",
-  location: "lokalizację",
+  location: "lokalizację źródłową",
   fromLocation: "lokalizację źródłową",
   toLocation: "lokalizację docelową",
+  cafe: "kawiarnię",
   qty: "ilość",
 };
 
