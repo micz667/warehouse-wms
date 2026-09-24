@@ -18,6 +18,17 @@ When cafe finger signature is impossible, a magazynier (or admin) opens a prepar
 3. Document shows bypass with actor, timestamp, and reason — same DB prove + `/ruchy/wydanie/[id]` emergency receipt.
 4. Normal signed path still works as default — DB prove signs a second prepared doc; F013b proves remain in `npm run check`.
 
+`npm run check` on clean candidate `de64977` (working tree clean):
+
+```
+prove-cafe-emergency: ok (roles · confirm+note · posts issue · UI/API · signed path intact)
+prove-cafe-emergency-db: ok (confirm+note · stock down · bypass logged · signed path intact)
+prove-cafe-signature: ok (roles · sign posts issue · pad/API · prepared-only · no nested form)
+prove-cafe-signature-db: ok (sign posts issue · stock down · no-sign stays · actor/ts · prepared-only)
+prove-cafe-prepare: ok (roles · prepare no Movement · hall seams · list/reopen · no nested form)
+… full native lane green (lint · typecheck · prisma validate · all prior proves including F016/F017) …
+```
+
 ## Key routes / seams
 
 - UI: `src/components/cafe-emergency-issue.tsx` on `/ruchy/wydanie/[id]` (prepared); emergency receipt when `signatureSkipped`
