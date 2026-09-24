@@ -53,6 +53,7 @@ const GESTURE_CHOICES: {
   { gesture: "wydaj", title: "Wydaj" },
   { gesture: "przenies", title: "Przenieś" },
   { gesture: "gdzie", title: "Gdzie leży?", onlyFor: "item" },
+  { gesture: "historia", title: "Historia", onlyFor: "item" },
 ];
 
 const FIELD_LABEL_PL: Record<string, string> = {

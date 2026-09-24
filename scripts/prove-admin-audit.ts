@@ -61,8 +61,23 @@ function main() {
     "utf8",
   );
   assert.match(movementsApi, /MOVEMENT_AUDIT_ROLES/);
+  assert.match(movementsApi, /movementListRequiresAudit/);
   assert.match(movementsApi, /catalogItemId/);
   assert.match(movementsApi, /createdById/);
+
+  const auditGate = readFileSync(
+    join(process.cwd(), "src/server/movements/movement-list-requires-audit.ts"),
+    "utf8",
+  );
+  assert.match(auditGate, /locationId/);
+  assert.match(auditGate, /createdById/);
+  assert.match(auditGate, /from/);
+  // Solo catalogItemId must remain hall-readable (F014) — not an audit trigger.
+  assert.doesNotMatch(
+    auditGate,
+    /hasValue\(params\.catalogItemId\)/,
+    "catalogItemId-only must not force audit roles",
+  );
 
   const usersApi = readFileSync(
     join(process.cwd(), "src/app/api/users/route.ts"),

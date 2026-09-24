@@ -99,6 +99,7 @@ function main() {
   assert.match(hub, /\/ruchy\/wydanie/);
   assert.match(hub, /\/ruchy\/przesuniecie/);
   assert.match(hub, /\/ruchy\/historia/);
+  assert.match(hub, /gesture:\s*"historia"/);
   assert.match(hub, /Inwentaryzacja/);
   assert.match(hub, /\/spis/);
   assert.match(hub, /Renowacja/);

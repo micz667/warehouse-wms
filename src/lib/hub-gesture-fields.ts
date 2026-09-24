@@ -5,7 +5,12 @@
 
 export type HubScanKind = "item" | "location";
 
-export type HubGesture = "przyjmij" | "wydaj" | "przenies" | "gdzie";
+export type HubGesture =
+  | "przyjmij"
+  | "wydaj"
+  | "przenies"
+  | "gdzie"
+  | "historia";
 
 export type HubField =
   | "item"
@@ -36,6 +41,10 @@ export function missingFieldsAfterHubScan(
       // Item scan is enough; location scan cannot answer “where is X?”.
       if (scanKind === "item") return [];
       return ["item"];
+    case "historia":
+      // Item scan deep-links into that SKU’s movements; location alone is not enough.
+      if (scanKind === "item") return [];
+      return ["item"];
   }
 }
 
@@ -50,6 +59,15 @@ export function hubGestureHref(
     }
     const qs = params.toString();
     return qs ? `/gdzie?${qs}` : "/gdzie";
+  }
+
+  if (gesture === "historia") {
+    const params = new URLSearchParams();
+    if (scan.kind === "item") {
+      params.set("catalogItemId", scan.id);
+    }
+    const qs = params.toString();
+    return qs ? `/ruchy/historia?${qs}` : "/ruchy/historia";
   }
 
   const base =

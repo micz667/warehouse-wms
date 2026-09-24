@@ -2,25 +2,28 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { gateRole } from "@/server/gate-role";
 import { listRecentMovements } from "@/server/movements/list-recent-movements";
+import { movementListRequiresAudit } from "@/server/movements/movement-list-requires-audit";
 import {
   MOVEMENT_AUDIT_ROLES,
   MOVEMENT_READ_ROLES,
 } from "@/server/movements/roles";
 
-function hasAuditFilters(url: URL): boolean {
-  return (
-    url.searchParams.has("from") ||
-    url.searchParams.has("to") ||
-    url.searchParams.has("catalogItemId") ||
-    url.searchParams.has("locationId") ||
-    url.searchParams.has("createdById")
-  );
-}
-
 export async function GET(request: Request) {
   const session = await auth();
   const url = new URL(request.url);
-  const filtered = hasAuditFilters(url);
+  const from = url.searchParams.get("from");
+  const to = url.searchParams.get("to");
+  const catalogItemId = url.searchParams.get("catalogItemId");
+  const locationId = url.searchParams.get("locationId");
+  const createdById = url.searchParams.get("createdById");
+
+  const filtered = movementListRequiresAudit({
+    from,
+    to,
+    catalogItemId,
+    locationId,
+    createdById,
+  });
 
   const gate = gateRole(
     session?.user?.role,
@@ -41,11 +44,11 @@ export async function GET(request: Request) {
 
   const movements = await listRecentMovements(prisma, {
     take: Number.isFinite(take) ? take : undefined,
-    from: url.searchParams.get("from"),
-    to: url.searchParams.get("to"),
-    catalogItemId: url.searchParams.get("catalogItemId"),
-    locationId: url.searchParams.get("locationId"),
-    createdById: url.searchParams.get("createdById"),
+    from,
+    to,
+    catalogItemId,
+    locationId,
+    createdById,
   });
 
   return Response.json({

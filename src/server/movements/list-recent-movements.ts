@@ -39,6 +39,7 @@ function trimId(value: string | null | undefined): string | undefined {
 /**
  * Movement history from the single Movement ledger.
  * Optional filters narrow by date range, item, location, actor (F009).
+ * Product-only catalogItemId is hall history (F014); audit auth is separate.
  */
 export async function listRecentMovements(
   db: PrismaClient,
