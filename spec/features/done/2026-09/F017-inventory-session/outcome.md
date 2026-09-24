@@ -18,9 +18,10 @@ Beyond opening stocktake, users run an **inwentaryzacja** session against an alr
 3. Approving posts correcting movements so post-approve balances equal counted qtys — same DB prove (system 10 → count 7 → balance 7; flat line unchanged).
 4. Re-approving an approved session is blocked — same prove (`already_approved`; movement count unchanged).
 
-`npm run check` on clean candidate (see PR / commit after board update):
+`npm run check` on clean candidate `09e485d`:
 
 ```
+> warehouse-wms@0.1.0 check
 > … prove:inventory-session …
 prove-inventory-session: ok (kind · variance approve · UI · hub · check wire)
 > … prove:inventory-session-db …
