@@ -17,7 +17,7 @@ Signed-in **magazynier** opens `/` on the hall **scan hub**: process tiles Przyj
 3. `missingFieldsAfterHubScan` never re-asks the known scan identity; forms take `fromHub` prefills — same prove.
 4. Inwentaryzacja → `/spis`, Renowacja → `/renowacja` from hub shortcuts — same prove.
 
-`npm run check` on clean candidate `68e68c5`:
+`npm run check` on clean candidate `70ba8b4`:
 
 ```
 > warehouse-wms@0.1.0 check
@@ -49,4 +49,4 @@ At running `npm start` on localhost:3000 after seed:
 - Unknown hub scan stayed on hub with inline error (no procedure required first).
 - Przyjmij tile → `/ruchy/przyjecie`; Renowacja shortcut → `/renowacja` stub.
 
-Frames: `/opt/cursor/artifacts/screenshots/f010-hub-tiles.webp`, `f010-hub-scan-error.webp`, `f010-przyjmij-form.webp`, `f010-renowacja-stub.webp`.
+Frames: `/opt/cursor/artifacts/screenshots/f010-hub-first-viewport.webp` (tiles+shortcuts, camera off), `f010-hub-scan-error.webp`, `f010-przyjmij-form.webp`, `f010-renowacja-stub.webp`. Hub camera defaults off so shortcuts fit the first viewport.
