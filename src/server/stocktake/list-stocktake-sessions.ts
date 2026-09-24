@@ -1,4 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
+import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export async function listStocktakeSessions(db: PrismaClient) {
   return db.stocktakeSession.findMany({
@@ -10,7 +12,7 @@ export async function listStocktakeSessions(db: PrismaClient) {
 }
 
 export async function getStocktakeSession(db: PrismaClient, id: string) {
-  return db.stocktakeSession.findUnique({
+  const session = await db.stocktakeSession.findUnique({
     where: { id },
     include: {
       lines: {
@@ -32,4 +34,34 @@ export async function getStocktakeSession(db: PrismaClient, id: string) {
       },
     },
   });
+
+  if (!session) return null;
+
+  if (session.kind !== "inventory") {
+    return {
+      ...session,
+      lines: session.lines.map((line) => ({
+        ...line,
+        systemQty: null as string | null,
+        variance: null as string | null,
+      })),
+    };
+  }
+
+  const lines = [];
+  for (const line of session.lines) {
+    const systemQty = await sumMovementQty(db, {
+      catalogItemId: line.catalogItemId,
+      locationId: line.locationId,
+    });
+    const counted = new Decimal(line.countedQty.toString());
+    const variance = counted.minus(systemQty);
+    lines.push({
+      ...line,
+      systemQty: systemQty.toString(),
+      variance: variance.toString(),
+    });
+  }
+
+  return { ...session, lines };
 }

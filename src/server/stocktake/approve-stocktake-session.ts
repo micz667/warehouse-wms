@@ -1,4 +1,6 @@
 import type { PrismaClient, StocktakeSession } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
+import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export type ApproveStocktakeResult =
   | {
@@ -14,7 +16,9 @@ export type ApproveStocktakeResult =
 
 /**
  * Approve a counting session in one transaction:
- * post an opening movement per line, then lock the session as approved.
+ * - opening (F005): post an opening movement per line (= counted qty)
+ * - inventory (F017): post a correction movement per line with non-zero
+ *   variance (counted − system SUM(movements))
  * Re-approve is blocked (no double post).
  */
 export async function approveStocktakeSession(
@@ -60,18 +64,47 @@ export async function approveStocktakeSession(
       };
     }
 
-    for (const line of session.lines) {
-      await tx.movement.create({
-        data: {
-          type: "opening",
+    let movementCount = 0;
+
+    if (session.kind === "inventory") {
+      for (const line of session.lines) {
+        const systemQty = await sumMovementQty(tx, {
           catalogItemId: line.catalogItemId,
           locationId: line.locationId,
-          qty: line.countedQty,
-          stocktakeSessionId: session.id,
-          stocktakeLineId: line.id,
-          createdById: options.createdById ?? null,
-        },
-      });
+        });
+        const variance = new Decimal(line.countedQty.toString()).minus(
+          systemQty,
+        );
+        if (variance.isZero()) continue;
+
+        await tx.movement.create({
+          data: {
+            type: "correction",
+            catalogItemId: line.catalogItemId,
+            locationId: line.locationId,
+            qty: variance,
+            stocktakeSessionId: session.id,
+            stocktakeLineId: line.id,
+            createdById: options.createdById ?? null,
+          },
+        });
+        movementCount += 1;
+      }
+    } else {
+      for (const line of session.lines) {
+        await tx.movement.create({
+          data: {
+            type: "opening",
+            catalogItemId: line.catalogItemId,
+            locationId: line.locationId,
+            qty: line.countedQty,
+            stocktakeSessionId: session.id,
+            stocktakeLineId: line.id,
+            createdById: options.createdById ?? null,
+          },
+        });
+      }
+      movementCount = session.lines.length;
     }
 
     const updated = await tx.stocktakeSession.update({
@@ -85,7 +118,7 @@ export async function approveStocktakeSession(
     return {
       ok: true,
       session: updated,
-      movementCount: session.lines.length,
+      movementCount,
     };
   });
 }

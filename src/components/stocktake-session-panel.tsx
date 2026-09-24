@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { STOCKTAKE_STATUS_LABEL_PL } from "@/lib/stocktake-labels";
+import {
+  STOCKTAKE_KIND_LABEL_PL,
+  STOCKTAKE_STATUS_LABEL_PL,
+} from "@/lib/stocktake-labels";
 
 type CatalogHit = {
   id: string;
@@ -22,6 +25,8 @@ type LocationHit = {
 type LineRow = {
   id: string;
   countedQty: string;
+  systemQty: string | null;
+  variance: string | null;
   catalogItem: CatalogHit;
   location: LocationHit;
 };
@@ -29,6 +34,7 @@ type LineRow = {
 type SessionDetail = {
   id: string;
   status: keyof typeof STOCKTAKE_STATUS_LABEL_PL;
+  kind: keyof typeof STOCKTAKE_KIND_LABEL_PL;
   note: string | null;
   approvedAt: string | null;
   lines: LineRow[];
@@ -38,6 +44,13 @@ type Props = {
   sessionId: string;
   canWrite: boolean;
 };
+
+function formatSigned(value: string): string {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return value;
+  if (n > 0) return `+${value}`;
+  return value;
+}
 
 export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
   const router = useRouter();
@@ -240,11 +253,14 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
     );
   }
 
+  const isInventory = session.kind === "inventory";
   const editable =
     canWrite &&
     (session.status === "draft" || session.status === "counting");
   const canStart = canWrite && session.status === "draft";
   const canApprove = canWrite && session.status === "counting";
+  const kindLabel =
+    STOCKTAKE_KIND_LABEL_PL[session.kind] ?? "Spis";
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-8">
@@ -256,10 +272,13 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
             </Link>
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">
-            {STOCKTAKE_STATUS_LABEL_PL[session.status]}
+            {kindLabel} · {STOCKTAKE_STATUS_LABEL_PL[session.status]}
           </h1>
           <p className="mt-1 text-zinc-600">
-            {session.note ?? "Sesja spisu z natury"}
+            {session.note ??
+              (isInventory
+                ? "Inwentaryzacja — liczenie względem stanu systemowego"
+                : "Sesja spisu z natury")}
             {session.approvedAt
               ? ` · zatwierdzono ${new Date(session.approvedAt).toLocaleString("pl-PL")}`
               : null}
@@ -283,7 +302,9 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
               onClick={approve}
               className="rounded bg-emerald-800 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
             >
-              Zatwierdź (ruchy otwarcia)
+              {isInventory
+                ? "Zatwierdź (korekty stanów)"
+                : "Zatwierdź (ruchy otwarcia)"}
             </button>
           ) : null}
           {session.status === "approved" ? (
@@ -300,6 +321,14 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
       {error ? (
         <p className="mt-4 text-sm text-red-700" role="alert">
           {error}
+        </p>
+      ) : null}
+
+      {isInventory && session.status === "counting" && session.lines.length > 0 ? (
+        <p className="mt-4 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          Przed zatwierdzeniem: odchylenie = policzone − stan systemowy (suma
+          ruchów). Zatwierdzenie zapisze korekty tylko dla pozycji z odchyleniem
+          ≠ 0.
         </p>
       ) : null}
 
@@ -321,17 +350,19 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
               />
               Z katalogu
             </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                checked={createNew}
-                onChange={() => setCreateNew(true)}
-              />
-              Nowa pozycja
-            </label>
+            {!isInventory ? (
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  checked={createNew}
+                  onChange={() => setCreateNew(true)}
+                />
+                Nowa pozycja
+              </label>
+            ) : null}
           </div>
 
-          {!createNew ? (
+          {!createNew || isInventory ? (
             <div>
               <label className="block text-sm font-medium text-zinc-700">
                 Pozycja katalogu
@@ -469,40 +500,80 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
               Brak pozycji — dodaj pierwsze liczenie.
             </li>
           ) : null}
-          {session.lines.map((line) => (
-            <li
-              key={line.id}
-              className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <p className="font-medium text-zinc-900">
-                  {line.catalogItem.name}{" "}
-                  <span className="font-normal text-zinc-500">
-                    ({line.catalogItem.sku})
-                  </span>
-                </p>
-                <p className="text-sm text-zinc-600">
-                  {line.location.label}{" "}
-                  <span className="font-mono">({line.location.code})</span>
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-semibold tabular-nums text-zinc-900">
-                  {String(line.countedQty)} {line.catalogItem.unit}
-                </span>
-                {editable ? (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void removeLine(line.id)}
-                    className="text-sm text-red-700 hover:underline disabled:opacity-60"
-                  >
-                    Usuń
-                  </button>
-                ) : null}
-              </div>
-            </li>
-          ))}
+          {session.lines.map((line) => {
+            const varianceNum =
+              line.variance != null ? Number(line.variance) : null;
+            const varianceTone =
+              varianceNum == null
+                ? "text-zinc-900"
+                : varianceNum === 0
+                  ? "text-zinc-600"
+                  : varianceNum > 0
+                    ? "text-emerald-800"
+                    : "text-red-800";
+
+            return (
+              <li
+                key={line.id}
+                className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="font-medium text-zinc-900">
+                    {line.catalogItem.name}{" "}
+                    <span className="font-normal text-zinc-500">
+                      ({line.catalogItem.sku})
+                    </span>
+                  </p>
+                  <p className="text-sm text-zinc-600">
+                    {line.location.label}{" "}
+                    <span className="font-mono">({line.location.code})</span>
+                  </p>
+                  {isInventory && line.systemQty != null ? (
+                    <p className="mt-1 text-sm text-zinc-600">
+                      System:{" "}
+                      <span className="tabular-nums">{line.systemQty}</span>
+                      {" · "}
+                      Policzono:{" "}
+                      <span className="tabular-nums">
+                        {String(line.countedQty)}
+                      </span>
+                      {" · "}
+                      Odchylenie:{" "}
+                      <span className={`font-semibold tabular-nums ${varianceTone}`}>
+                        {formatSigned(line.variance ?? "0")}
+                      </span>{" "}
+                      {line.catalogItem.unit}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-3">
+                  {!isInventory ? (
+                    <span className="text-lg font-semibold tabular-nums text-zinc-900">
+                      {String(line.countedQty)} {line.catalogItem.unit}
+                    </span>
+                  ) : (
+                    <span
+                      className={`text-lg font-semibold tabular-nums ${varianceTone}`}
+                      title="Odchylenie (policzone − system)"
+                    >
+                      {formatSigned(line.variance ?? "0")}{" "}
+                      {line.catalogItem.unit}
+                    </span>
+                  )}
+                  {editable ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void removeLine(line.id)}
+                      className="text-sm text-red-700 hover:underline disabled:opacity-60"
+                    >
+                      Usuń
+                    </button>
+                  ) : null}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>

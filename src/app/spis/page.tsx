@@ -16,7 +16,7 @@ export default async function SpisPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <AppHeader title="Spis z natury" />
+      <AppHeader title="Spis i inwentaryzacja" />
       <StocktakeSessionList canWrite={canWrite} />
     </div>
   );
