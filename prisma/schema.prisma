@@ -22,6 +22,13 @@ enum StocktakeStatus {
   approved
 }
 
+/// Opening stocktake (F005) posts `opening` movements.
+/// Inventory session (F017) posts variance `correction` movements against existing stock.
+enum StocktakeKind {
+  opening
+  inventory
+}
+
 /// Explicit movement kinds. Stock is only the sum of these rows (signed qty).
 /// `receipt` / `issue` / `transfer` are seeded for F006 proof; F007 adds scan UI.
 enum MovementType {
@@ -106,10 +113,13 @@ model Location {
   @@index([isRenovation])
 }
 
-/// Physical stocktake session (`spis z natury`). Opening stock is posted only on approve.
+/// Physical stocktake / inventory session (`spis z natury` / inwentaryzacja).
+/// Opening (F005) posts `opening` movements; inventory (F017) posts variance
+/// `correction` movements. Stock is never a writable raw qty column.
 model StocktakeSession {
   id          String          @id @default(cuid())
   status      StocktakeStatus @default(draft)
+  kind        StocktakeKind   @default(opening)
   note        String?
   createdById String?
   approvedAt  DateTime?
@@ -120,6 +130,7 @@ model StocktakeSession {
   createdBy   User?           @relation(fields: [createdById], references: [id])
 
   @@index([status])
+  @@index([kind])
 }
 
 model StocktakeLine {

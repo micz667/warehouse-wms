@@ -49,9 +49,18 @@ export async function POST(request: Request) {
   const record =
     body && typeof body === "object" ? (body as Record<string, unknown>) : {};
 
+  const kindRaw = typeof record.kind === "string" ? record.kind : "opening";
+  if (kindRaw !== "opening" && kindRaw !== "inventory") {
+    return Response.json(
+      { error: "Nieprawidłowy rodzaj sesji" },
+      { status: 400 },
+    );
+  }
+
   const result = await createStocktakeSession(prisma, {
     note: typeof record.note === "string" ? record.note : null,
     createdById: session?.user?.id ?? null,
+    kind: kindRaw,
   });
 
   if (!result.ok) {

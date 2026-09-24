@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { STOCKTAKE_STATUS_LABEL_PL } from "@/lib/stocktake-labels";
+import {
+  STOCKTAKE_KIND_LABEL_PL,
+  STOCKTAKE_STATUS_LABEL_PL,
+} from "@/lib/stocktake-labels";
 
 type SessionRow = {
   id: string;
   status: keyof typeof STOCKTAKE_STATUS_LABEL_PL;
+  kind: keyof typeof STOCKTAKE_KIND_LABEL_PL;
   note: string | null;
   createdAt: string;
   approvedAt: string | null;
@@ -23,7 +27,9 @@ export function StocktakeSessionList({ canWrite }: Props) {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState<"opening" | "inventory" | null>(
+    null,
+  );
 
   const load = useCallback(() => {
     startTransition(async () => {
@@ -45,14 +51,14 @@ export function StocktakeSessionList({ canWrite }: Props) {
     load();
   }, [load]);
 
-  async function createSession() {
-    setCreating(true);
+  async function createSession(kind: "opening" | "inventory") {
+    setCreating(kind);
     setError(null);
     try {
       const res = await fetch("/api/stocktakes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ kind }),
       });
       const body = (await res.json().catch(() => null)) as {
         session?: { id: string };
@@ -65,7 +71,7 @@ export function StocktakeSessionList({ canWrite }: Props) {
       router.push(`/spis/${body.session.id}`);
       router.refresh();
     } finally {
-      setCreating(false);
+      setCreating(null);
     }
   }
 
@@ -74,22 +80,34 @@ export function StocktakeSessionList({ canWrite }: Props) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
-            Spis z natury
+            Spis i inwentaryzacja
           </h1>
           <p className="mt-1 text-zinc-600">
-            Liczenie otwiera stany jako ruchy początkowe — bez ręcznej edycji
-            ilości.
+            Otwarcie zakłada stany początkowe. Inwentaryzacja liczy na hali,
+            pokazuje odchylenia i po zatwierdzeniu koryguje ruchy.
           </p>
         </div>
         {canWrite ? (
-          <button
-            type="button"
-            onClick={createSession}
-            disabled={creating}
-            className="inline-flex items-center justify-center rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
-          >
-            {creating ? "Tworzenie…" : "Nowa sesja"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void createSession("inventory")}
+              disabled={creating !== null}
+              className="inline-flex items-center justify-center rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+            >
+              {creating === "inventory"
+                ? "Tworzenie…"
+                : "Nowa inwentaryzacja"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void createSession("opening")}
+              disabled={creating !== null}
+              className="inline-flex items-center justify-center rounded border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100 disabled:opacity-60"
+            >
+              {creating === "opening" ? "Tworzenie…" : "Spis otwarcia"}
+            </button>
+          </div>
         ) : null}
       </div>
 
@@ -113,6 +131,7 @@ export function StocktakeSessionList({ canWrite }: Props) {
             >
               <div>
                 <p className="font-medium text-zinc-900">
+                  {STOCKTAKE_KIND_LABEL_PL[session.kind] ?? "Spis"} ·{" "}
                   {STOCKTAKE_STATUS_LABEL_PL[session.status]}
                   {session.note ? (
                     <span className="font-normal text-zinc-600">
