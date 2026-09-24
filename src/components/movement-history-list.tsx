@@ -26,6 +26,10 @@ type ActorOption = { id: string; email: string; name: string | null };
 type Props = {
   /** When true, show date/item/location/actor filters (admin audit). */
   showFilters?: boolean;
+  /** Hall product history: always filter to this catalog item (F014). */
+  initialCatalogItemId?: string;
+  /** Optional label shown when viewing one product’s movements. */
+  productLabel?: string;
 };
 
 function toDateInputValue(d: Date): string {
@@ -35,14 +39,20 @@ function toDateInputValue(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-export function MovementHistoryList({ showFilters = false }: Props) {
+export function MovementHistoryList({
+  showFilters = false,
+  initialCatalogItemId,
+  productLabel,
+}: Props) {
   const [rows, setRows] = useState<MovementRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [catalogItemId, setCatalogItemId] = useState("");
+  const [catalogItemId, setCatalogItemId] = useState(
+    initialCatalogItemId ?? "",
+  );
   const [locationId, setLocationId] = useState("");
   const [createdById, setCreatedById] = useState("");
 
@@ -50,12 +60,16 @@ export function MovementHistoryList({ showFilters = false }: Props) {
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
   const [actorOptions, setActorOptions] = useState<ActorOption[]>([]);
 
+  const productScoped = Boolean(initialCatalogItemId) && !showFilters;
+
   const load = useCallback(() => {
     startTransition(async () => {
       setError(null);
       const params = new URLSearchParams();
       params.set("take", showFilters ? "100" : "40");
-      if (showFilters) {
+      if (productScoped && initialCatalogItemId) {
+        params.set("catalogItemId", initialCatalogItemId);
+      } else if (showFilters) {
         if (from) {
           params.set("from", new Date(`${from}T00:00:00`).toISOString());
         }
@@ -79,6 +93,8 @@ export function MovementHistoryList({ showFilters = false }: Props) {
     });
   }, [
     showFilters,
+    productScoped,
+    initialCatalogItemId,
     from,
     to,
     catalogItemId,
@@ -125,12 +141,20 @@ export function MovementHistoryList({ showFilters = false }: Props) {
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
-            {showFilters ? "Audyt ruchów" : "Historia ruchów"}
+            {showFilters
+              ? "Audyt ruchów"
+              : productScoped
+                ? "Historia pozycji"
+                : "Historia ruchów"}
           </h1>
           <p className="mt-1 text-zinc-600">
             {showFilters
               ? "Filtruj po dacie, pozycji, lokalizacji i wykonawcy."
-              : "Ostatnie ruchy z aktorem i czasem."}
+              : productScoped
+                ? productLabel
+                  ? `Ruchy dla ${productLabel} — typ, ilość, lokalizacja, wykonawca, czas.`
+                  : "Ruchy tej pozycji — typ, ilość, lokalizacja, wykonawca, czas."
+                : "Ostatnie ruchy z aktorem i czasem."}
           </p>
         </div>
         <button

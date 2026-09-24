@@ -105,6 +105,13 @@ export function CatalogEditForm({ item, canWrite }: Props) {
             Gdzie leży?
           </Link>
           <Link
+            href={`/ruchy/historia?catalogItemId=${encodeURIComponent(item.id)}`}
+            className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
+            data-testid="catalog-history-link"
+          >
+            Historia
+          </Link>
+          <Link
             href={`/katalog/${item.id}/etykieta`}
             className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
           >
