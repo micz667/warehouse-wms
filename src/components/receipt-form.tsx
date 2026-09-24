@@ -10,11 +10,21 @@ import type { PickedLocation } from "@/components/location-picker";
 
 type Props = {
   canWrite: boolean;
+  initialItem?: ScannedCatalogItem | null;
+  initialLocation?: PickedLocation | null;
+  fromHub?: boolean;
 };
 
-export function ReceiptForm({ canWrite }: Props) {
-  const [item, setItem] = useState<ScannedCatalogItem | null>(null);
-  const [location, setLocation] = useState<PickedLocation | null>(null);
+export function ReceiptForm({
+  canWrite,
+  initialItem = null,
+  initialLocation = null,
+  fromHub = false,
+}: Props) {
+  const [item, setItem] = useState<ScannedCatalogItem | null>(initialItem);
+  const [location, setLocation] = useState<PickedLocation | null>(
+    initialLocation,
+  );
   const [qty, setQty] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
@@ -53,6 +63,11 @@ export function ReceiptForm({ canWrite }: Props) {
     }
   }
 
+  const missing: string[] = [];
+  if (!item) missing.push("pozycję");
+  if (!location) missing.push("lokalizację");
+  if (!qty.trim()) missing.push("ilość");
+
   return (
     <form className="mx-auto w-full max-w-lg space-y-6 px-6 py-8" onSubmit={submit}>
       <div>
@@ -60,7 +75,9 @@ export function ReceiptForm({ canWrite }: Props) {
           Przyjęcie
         </h1>
         <p className="mt-1 text-zinc-600">
-          Pozycja + ilość + lokalizacja docelowa — ruch zwiększa stan.
+          {fromHub && (initialItem || initialLocation)
+            ? `Dokończ przyjęcie — brakuje: ${missing.join(", ") || "potwierdzenia"}.`
+            : "Pozycja + ilość + lokalizacja docelowa — ruch zwiększa stan."}
         </p>
       </div>
 
@@ -70,21 +87,47 @@ export function ReceiptForm({ canWrite }: Props) {
         </p>
       ) : null}
 
-      <ItemScanField
-        selected={item}
-        onSelect={(next) => {
-          setItem(next);
-          setOk(null);
-        }}
-      />
-      <LocationField
-        label="Lokalizacja docelowa"
-        selected={location}
-        onSelect={(loc) => {
-          setLocation(loc);
-          setOk(null);
-        }}
-      />
+      {initialItem && fromHub && item ? (
+        <div
+          className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
+          data-testid="picked-item"
+          data-item-id={item.id}
+        >
+          <strong>{item.name}</strong>{" "}
+          <span className="font-mono text-zinc-700">
+            ({item.sku} · {item.barcode})
+          </span>
+        </div>
+      ) : (
+        <ItemScanField
+          selected={item}
+          onSelect={(next) => {
+            setItem(next);
+            setOk(null);
+          }}
+        />
+      )}
+
+      {initialLocation && fromHub && location ? (
+        <div
+          className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
+          data-testid="picked-location"
+          data-location-id={location.id}
+        >
+          <strong>{location.label}</strong>{" "}
+          <span className="font-mono">({location.code})</span>
+        </div>
+      ) : (
+        <LocationField
+          label="Lokalizacja docelowa"
+          selected={location}
+          onSelect={(loc) => {
+            setLocation(loc);
+            setOk(null);
+          }}
+        />
+      )}
+
       <label className="block space-y-1">
         <span className="text-sm font-medium text-zinc-800">Ilość</span>
         <input

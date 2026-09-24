@@ -10,12 +10,22 @@ import type { PickedLocation } from "@/components/location-picker";
 
 type Props = {
   canWrite: boolean;
+  initialItem?: ScannedCatalogItem | null;
+  initialFrom?: PickedLocation | null;
+  initialTo?: PickedLocation | null;
+  fromHub?: boolean;
 };
 
-export function TransferForm({ canWrite }: Props) {
-  const [item, setItem] = useState<ScannedCatalogItem | null>(null);
-  const [from, setFrom] = useState<PickedLocation | null>(null);
-  const [to, setTo] = useState<PickedLocation | null>(null);
+export function TransferForm({
+  canWrite,
+  initialItem = null,
+  initialFrom = null,
+  initialTo = null,
+  fromHub = false,
+}: Props) {
+  const [item, setItem] = useState<ScannedCatalogItem | null>(initialItem);
+  const [from, setFrom] = useState<PickedLocation | null>(initialFrom);
+  const [to, setTo] = useState<PickedLocation | null>(initialTo);
   const [qty, setQty] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
@@ -56,6 +66,12 @@ export function TransferForm({ canWrite }: Props) {
     }
   }
 
+  const missing: string[] = [];
+  if (!item) missing.push("pozycję");
+  if (!from) missing.push("lokalizację źródłową");
+  if (!to) missing.push("lokalizację docelową");
+  if (!qty.trim()) missing.push("ilość");
+
   return (
     <form className="mx-auto w-full max-w-lg space-y-6 px-6 py-8" onSubmit={submit}>
       <div>
@@ -63,7 +79,9 @@ export function TransferForm({ canWrite }: Props) {
           Przesunięcie
         </h1>
         <p className="mt-1 text-zinc-600">
-          Para ruchów transfer: −źródło i +cel o tej samej ilości.
+          {fromHub && (initialItem || initialFrom || initialTo)
+            ? `Dokończ przesunięcie — brakuje: ${missing.join(", ") || "potwierdzenia"}.`
+            : "Para ruchów transfer: −źródło i +cel o tej samej ilości."}
         </p>
       </div>
 
@@ -73,29 +91,67 @@ export function TransferForm({ canWrite }: Props) {
         </p>
       ) : null}
 
-      <ItemScanField
-        selected={item}
-        onSelect={(next) => {
-          setItem(next);
-          setOk(null);
-        }}
-      />
-      <LocationField
-        label="Lokalizacja źródłowa"
-        selected={from}
-        onSelect={(loc) => {
-          setFrom(loc);
-          setOk(null);
-        }}
-      />
-      <LocationField
-        label="Lokalizacja docelowa"
-        selected={to}
-        onSelect={(loc) => {
-          setTo(loc);
-          setOk(null);
-        }}
-      />
+      {initialItem && fromHub && item ? (
+        <div
+          className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
+          data-testid="picked-item"
+          data-item-id={item.id}
+        >
+          <strong>{item.name}</strong>{" "}
+          <span className="font-mono text-zinc-700">
+            ({item.sku} · {item.barcode})
+          </span>
+        </div>
+      ) : (
+        <ItemScanField
+          selected={item}
+          onSelect={(next) => {
+            setItem(next);
+            setOk(null);
+          }}
+        />
+      )}
+
+      {initialFrom && fromHub && from ? (
+        <div
+          className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
+          data-testid="picked-location"
+          data-location-id={from.id}
+        >
+          Źródło: <strong>{from.label}</strong>{" "}
+          <span className="font-mono">({from.code})</span>
+        </div>
+      ) : (
+        <LocationField
+          label="Lokalizacja źródłowa"
+          selected={from}
+          onSelect={(loc) => {
+            setFrom(loc);
+            setOk(null);
+          }}
+        />
+      )}
+
+      {initialTo && fromHub && to ? (
+        <div
+          className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
+          data-testid="picked-location-to"
+          data-location-id={to.id}
+        >
+          Cel: <strong>{to.label}</strong>{" "}
+          <span className="font-mono">({to.code})</span>
+        </div>
+      ) : (
+        <LocationField
+          label="Lokalizacja docelowa"
+          selected={to}
+          onSelect={(loc) => {
+            setTo(loc);
+            setOk(null);
+          }}
+        />
+      )}
+
       <label className="block space-y-1">
         <span className="text-sm font-medium text-zinc-800">Ilość</span>
         <input

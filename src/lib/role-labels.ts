@@ -9,7 +9,7 @@ export const ROLE_LABEL_PL: Record<Role, string> = {
 export function shellBlurbForRole(role: Role): string {
   switch (role) {
     case "magazynier":
-      return "Widok hali: skan przyjęć, przesunięć i wydań.";
+      return "Hub skanu: Przyjmij / Wydaj / Przenieś / Historia.";
     case "architekt":
       return "Widok architekta: listy zakupów z katalogu.";
     case "admin":

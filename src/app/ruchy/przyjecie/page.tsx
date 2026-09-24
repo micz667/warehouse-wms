@@ -1,10 +1,19 @@
 import { AppHeader } from "@/components/app-header";
 import { ReceiptForm } from "@/components/receipt-form";
 import { auth } from "@/auth";
+import { loadHubPrefill } from "@/lib/load-hub-prefill";
 import { MOVEMENT_WRITE_ROLES } from "@/server/movements/roles";
 import { redirect } from "next/navigation";
 
-export default async function PrzyjeciePage() {
+type PageProps = {
+  searchParams: Promise<{
+    itemId?: string;
+    locationId?: string;
+    fromHub?: string;
+  }>;
+};
+
+export default async function PrzyjeciePage({ searchParams }: PageProps) {
   const session = await auth();
   if (!session?.user?.role) {
     redirect("/login");
@@ -13,11 +22,18 @@ export default async function PrzyjeciePage() {
   const canWrite = (MOVEMENT_WRITE_ROLES as readonly string[]).includes(
     session.user.role,
   );
+  const params = await searchParams;
+  const prefill = await loadHubPrefill(params);
 
   return (
     <div className="flex flex-1 flex-col">
       <AppHeader title="Przyjęcie" />
-      <ReceiptForm canWrite={canWrite} />
+      <ReceiptForm
+        canWrite={canWrite}
+        initialItem={prefill.item}
+        initialLocation={prefill.location}
+        fromHub={prefill.fromHub}
+      />
     </div>
   );
 }

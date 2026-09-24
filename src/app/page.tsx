@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AppHeader } from "@/components/app-header";
+import { ScanHub } from "@/components/scan-hub";
 import { auth } from "@/auth";
 import { LogoutButton } from "@/components/logout-button";
 import { ROLE_LABEL_PL, shellBlurbForRole } from "@/lib/role-labels";
@@ -23,6 +25,17 @@ export default async function Home() {
   }
 
   const role = session.user.role;
+
+  // Magazynier hall: scan hub is the home (F010). Architect/admin keep menu shell.
+  if (role === "magazynier") {
+    return (
+      <div className="flex flex-1 flex-col">
+        <AppHeader title="Hala" />
+        <ScanHub />
+      </div>
+    );
+  }
+
   const roleLabel = ROLE_LABEL_PL[role];
   const canWriteCatalog = (CATALOG_WRITE_ROLES as readonly string[]).includes(
     role,
