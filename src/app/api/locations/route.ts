@@ -23,7 +23,10 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q") ?? undefined;
-  const locations = await listLocations(prisma, q);
+  const renovationOnly =
+    searchParams.get("renovation") === "1" ||
+    searchParams.get("renovation") === "true";
+  const locations = await listLocations(prisma, { query: q, renovationOnly });
   return Response.json({ locations });
 }
 
@@ -55,6 +58,7 @@ export async function POST(request: Request) {
   const result = await createLocation(prisma, {
     code: typeof record.code === "string" ? record.code : "",
     label: typeof record.label === "string" ? record.label : "",
+    isRenovation: record.isRenovation === true,
   });
 
   if (!result.ok) {

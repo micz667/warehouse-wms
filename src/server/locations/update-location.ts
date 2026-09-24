@@ -4,6 +4,7 @@ import { normalizeLocationCode } from "./normalize-location-code";
 export type UpdateLocationInput = {
   code?: string;
   label?: string;
+  isRenovation?: boolean;
 };
 
 export type UpdateLocationResult =
@@ -33,7 +34,11 @@ export async function updateLocation(
     return { ok: false, error: "not_found", message: "Lokalizacja nie istnieje" };
   }
 
-  const data: { code?: string; label?: string } = {};
+  const data: { code?: string; label?: string; isRenovation?: boolean } = {};
+
+  if (input.isRenovation !== undefined) {
+    data.isRenovation = Boolean(input.isRenovation);
+  }
 
   if (input.code !== undefined) {
     const code = normalizeLocationCode(input.code);

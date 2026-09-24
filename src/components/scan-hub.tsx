@@ -32,6 +32,11 @@ const PROCESS_TILES = [
     blurb: "Z półki na półkę.",
   },
   {
+    href: "/ruchy/zwrot",
+    title: "Zwrot",
+    blurb: "Dobry zwrot na półkę.",
+  },
+  {
     href: "/gdzie",
     title: "Gdzie leży?",
     blurb: "Gdzie leży pozycja X?",
@@ -52,6 +57,8 @@ const GESTURE_CHOICES: {
   { gesture: "przyjmij", title: "Przyjmij" },
   { gesture: "wydaj", title: "Wydaj" },
   { gesture: "przenies", title: "Przenieś" },
+  { gesture: "zwrot", title: "Zwrot" },
+  { gesture: "renowacja", title: "Do renowacji" },
   { gesture: "gdzie", title: "Gdzie leży?", onlyFor: "item" },
   { gesture: "historia", title: "Historia", onlyFor: "item" },
 ];

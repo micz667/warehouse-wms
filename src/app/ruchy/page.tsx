@@ -14,6 +14,11 @@ const FLOWS = [
     blurb: "Towar na lokalizację — zwiększa stan.",
   },
   {
+    href: "/ruchy/zwrot",
+    title: "Zwrot",
+    blurb: "Dobry zwrot na półkę — osobny gest od renowacji.",
+  },
+  {
     href: "/ruchy/przesuniecie",
     title: "Przenieś",
     blurb: "Z półki na półkę — skan źródła, pozycji i celu.",
@@ -22,6 +27,11 @@ const FLOWS = [
     href: "/gdzie",
     title: "Gdzie leży?",
     blurb: "Lokalizacje i stan jednej pozycji.",
+  },
+  {
+    href: "/renowacja",
+    title: "Renowacja",
+    blurb: "Zwrot do sekcji i wydanie do dostawcy.",
   },
   {
     href: "/ruchy/wydanie",

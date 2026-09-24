@@ -9,6 +9,7 @@ export type LocationView = {
   id: string;
   code: string;
   label: string;
+  isRenovation: boolean;
 };
 
 type Props = {
@@ -20,6 +21,7 @@ export function LocationEditForm({ location, canWrite }: Props) {
   const router = useRouter();
   const [code, setCode] = useState(location.code);
   const [label, setLabel] = useState(location.label);
+  const [isRenovation, setIsRenovation] = useState(location.isRenovation);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -34,7 +36,7 @@ export function LocationEditForm({ location, canWrite }: Props) {
       const res = await fetch(`/api/locations/${location.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, label }),
+        body: JSON.stringify({ code, label, isRenovation }),
       });
       const body = (await res.json().catch(() => null)) as
         | { location?: LocationView; error?: string }
@@ -45,6 +47,7 @@ export function LocationEditForm({ location, canWrite }: Props) {
       }
       setCode(body.location.code);
       setLabel(body.location.label);
+      setIsRenovation(body.location.isRenovation);
       setMessage("Zapisano zmiany");
       router.refresh();
     } finally {
@@ -99,6 +102,20 @@ export function LocationEditForm({ location, canWrite }: Props) {
             disabled={!canWrite}
             className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm disabled:bg-zinc-100"
           />
+        </label>
+        <label className="flex items-center gap-2" htmlFor="isRenovation">
+          <input
+            id="isRenovation"
+            type="checkbox"
+            checked={isRenovation}
+            onChange={(e) => setIsRenovation(e.target.checked)}
+            disabled={!canWrite}
+            className="size-4 rounded border-zinc-300"
+            data-testid="location-is-renovation"
+          />
+          <span className="text-sm text-zinc-800">
+            Sekcja renowacji (zwroty uszkodzone / brudne)
+          </span>
         </label>
 
         {error ? (

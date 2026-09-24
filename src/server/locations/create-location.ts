@@ -4,6 +4,7 @@ import { normalizeLocationCode } from "./normalize-location-code";
 export type CreateLocationInput = {
   code: string;
   label: string;
+  isRenovation?: boolean;
 };
 
 export type CreateLocationResult =
@@ -55,7 +56,11 @@ export async function createLocation(
 
   try {
     const location = await db.location.create({
-      data: { code, label },
+      data: {
+        code,
+        label,
+        isRenovation: Boolean(input.isRenovation),
+      },
     });
     return { ok: true, location };
   } catch {

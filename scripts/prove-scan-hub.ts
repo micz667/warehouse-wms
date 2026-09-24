@@ -116,7 +116,14 @@ function main() {
     "utf8",
   );
   assert.match(renowacja, /Renowacja/);
-  assert.match(renowacja, /F016/);
+  assert.match(renowacja, /\/renowacja\/zwrot/);
+  assert.match(renowacja, /\/renowacja\/wydanie/);
+  assert.match(renowacja, /\/ruchy\/zwrot/);
+  assert.doesNotMatch(
+    renowacja,
+    /Tymczasowo: przenieś/,
+    "renovation stub handoff must be replaced by F016 gestures",
+  );
 
   const receipt = readFileSync(
     join(process.cwd(), "src/components/receipt-form.tsx"),

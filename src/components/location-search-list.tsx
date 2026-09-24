@@ -8,6 +8,7 @@ export type LocationListItem = {
   id: string;
   code: string;
   label: string;
+  isRenovation?: boolean;
 };
 
 type Props = {
@@ -115,7 +116,14 @@ export function LocationSearchList({ canWrite }: Props) {
               onClick={() => router.push(`/lokalizacje/${loc.id}`)}
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-zinc-900">{loc.label}</p>
+                <p className="truncate font-medium text-zinc-900">
+                  {loc.label}
+                  {loc.isRenovation ? (
+                    <span className="ml-2 text-xs font-normal text-zinc-500">
+                      renowacja
+                    </span>
+                  ) : null}
+                </p>
                 <p className="mt-0.5 font-mono text-sm text-zinc-600">
                   {loc.code}
                 </p>

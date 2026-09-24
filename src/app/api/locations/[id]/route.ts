@@ -59,6 +59,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   const result = await updateLocation(prisma, id, {
     code: typeof record.code === "string" ? record.code : undefined,
     label: typeof record.label === "string" ? record.label : undefined,
+    isRenovation:
+      typeof record.isRenovation === "boolean"
+        ? record.isRenovation
+        : undefined,
   });
 
   if (!result.ok) {
