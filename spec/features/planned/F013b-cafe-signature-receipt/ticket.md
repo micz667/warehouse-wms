@@ -8,11 +8,11 @@ At the cafe, the recipient finger-signs receipt of a prepared package. Only then
 
 - Open a prepared cafe issue document on site; capture finger signature.
 - On successful sign, post issue movements that leave warehouse stock; show signature actor and timestamp on the document or in movement history.
-- Starting seam: prepared/in-transit cafe issue documents from hall prepare (F013).
+- Starting seam: prepared/in-transit cafe issue documents from hall prepare (F013a).
 
 ## Out of scope
 
-- Building the package on the hall (F013).
+- Building the package on the hall (F013a).
 - Emergency issue without signature (F018).
 - Returns and renovation.
 
@@ -25,4 +25,4 @@ At the cafe, the recipient finger-signs receipt of a prepared package. Only then
 
 ## Notes
 
-- Default cafe path is F013 prepare then F013b signature; F018 is the logged bypass of this signature step.
+- Default cafe path is F013a prepare then F013b signature; F018 is the logged bypass of this signature step.
