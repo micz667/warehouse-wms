@@ -48,7 +48,8 @@ enum ShoppingListStatus {
 }
 
 /// Cafe issue document. Prepare (F013a) leaves stock unchanged; signature
-/// (F013b) posts issue movements. `prepared` = in-transit; `received` = signed.
+/// (F013b) or emergency bypass (F018) posts issue movements.
+/// `prepared` = in-transit; `received` = signed or emergency-issued.
 enum CafeIssueStatus {
   prepared
   received
@@ -214,7 +215,8 @@ model ShoppingListLine {
   @@index([listId])
 }
 
-/// Hall-prepared cafe shipment. Stock leaves only after signature (F013b).
+/// Hall-prepared cafe shipment. Stock leaves after signature (F013b) or
+/// conscious emergency bypass without signature (F018).
 model CafeIssue {
   id             String          @id @default(cuid())
   status         CafeIssueStatus @default(prepared)
@@ -226,6 +228,10 @@ model CafeIssue {
   signatureData  String?
   signedAt       DateTime?
   signedById     String?
+  /// True when completed via F018 emergency issue (no finger signature).
+  signatureSkipped Boolean       @default(false)
+  /// Required reason/note when signatureSkipped (emergency path).
+  emergencyNote  String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   lines          CafeIssueLine[]
@@ -237,6 +243,7 @@ model CafeIssue {
   @@index([preparedAt])
   @@index([cafeLocationId])
   @@index([signedAt])
+  @@index([signatureSkipped])
 }
 
 model CafeIssueLine {

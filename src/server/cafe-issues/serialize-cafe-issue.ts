@@ -34,6 +34,8 @@ export function serializeCafeIssue(doc: CafeIssueWithDetails) {
     signatureData: doc.signatureData,
     signedAt: doc.signedAt ? doc.signedAt.toISOString() : null,
     signedById: doc.signedById,
+    signatureSkipped: doc.signatureSkipped,
+    emergencyNote: doc.emergencyNote,
     signedBy: doc.signedBy
       ? {
           id: doc.signedBy.id,
@@ -64,6 +66,7 @@ export function serializeCafeIssueListRow(
     note: doc.note,
     preparedAt: doc.preparedAt.toISOString(),
     createdAt: doc.createdAt.toISOString(),
+    signatureSkipped: doc.signatureSkipped,
     cafeLocation: doc.cafeLocation,
     lineCount: doc._count.lines,
   };

@@ -9,7 +9,7 @@ import {
 } from "@/components/item-scan-field";
 import { LocationField } from "@/components/location-field";
 import type { PickedLocation } from "@/components/location-picker";
-import { CAFE_ISSUE_STATUS_LABEL_PL } from "@/lib/cafe-issue-labels";
+import { cafeIssueStatusLabelPl } from "@/lib/cafe-issue-labels";
 
 type DraftLine = {
   key: string;
@@ -20,11 +20,12 @@ type DraftLine = {
 
 type PreparedRow = {
   id: string;
-  status: keyof typeof CAFE_ISSUE_STATUS_LABEL_PL;
+  status: "prepared" | "received";
   preparedAt: string;
   cafeLocation: { id: string; code: string; label: string };
   lineCount: number;
   note: string | null;
+  signatureSkipped?: boolean;
 };
 
 type Props = {
@@ -400,7 +401,7 @@ export function CafePrepareForm({
                     </span>
                   </p>
                   <p className="mt-0.5 text-sm text-zinc-600">
-                    {CAFE_ISSUE_STATUS_LABEL_PL[row.status]} · {row.lineCount}{" "}
+                    {cafeIssueStatusLabelPl(row)} · {row.lineCount}{" "}
                     poz. ·{" "}
                     {new Date(row.preparedAt).toLocaleString("pl-PL")}
                   </p>

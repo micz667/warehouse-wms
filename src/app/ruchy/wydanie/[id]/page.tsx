@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
+import { CafeEmergencyIssue } from "@/components/cafe-emergency-issue";
 import { CafeSignaturePad } from "@/components/cafe-signature-pad";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { CAFE_ISSUE_STATUS_LABEL_PL } from "@/lib/cafe-issue-labels";
+import { cafeIssueStatusLabelPl } from "@/lib/cafe-issue-labels";
 import { getCafeIssue } from "@/server/cafe-issues/get-cafe-issue";
 import {
   CAFE_ISSUE_READ_ROLES,
@@ -24,7 +25,7 @@ export default async function CafeIssueDetailPage({ params }: PageProps) {
     redirect("/");
   }
 
-  const canSign = (CAFE_ISSUE_WRITE_ROLES as readonly string[]).includes(
+  const canWrite = (CAFE_ISSUE_WRITE_ROLES as readonly string[]).includes(
     session.user.role,
   );
 
@@ -32,7 +33,7 @@ export default async function CafeIssueDetailPage({ params }: PageProps) {
   const doc = await getCafeIssue(prisma, id);
   if (!doc) notFound();
 
-  const signerLabel =
+  const actorLabel =
     doc.signedBy?.name?.trim() ||
     doc.signedBy?.email ||
     (doc.signedById ? doc.signedById : null);
@@ -45,10 +46,11 @@ export default async function CafeIssueDetailPage({ params }: PageProps) {
         data-testid="cafe-issue-detail"
         data-cafe-issue-id={doc.id}
         data-status={doc.status}
+        data-signature-skipped={doc.signatureSkipped ? "true" : "false"}
       >
         <div>
           <p className="text-sm uppercase tracking-wide text-zinc-500">
-            {CAFE_ISSUE_STATUS_LABEL_PL[doc.status]}
+            {cafeIssueStatusLabelPl(doc)}
           </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
             {doc.cafeLocation.label}
@@ -85,8 +87,54 @@ export default async function CafeIssueDetailPage({ params }: PageProps) {
               Stan magazynu nie został jeszcze obniżony. Podpis odbioru odejmie
               ilości z półek źródłowych.
             </p>
-            <CafeSignaturePad cafeIssueId={doc.id} canSign={canSign} />
+            <CafeSignaturePad cafeIssueId={doc.id} canSign={canWrite} />
+            <CafeEmergencyIssue cafeIssueId={doc.id} canIssue={canWrite} />
           </>
+        ) : doc.signatureSkipped ? (
+          <section
+            className="space-y-3"
+            data-testid="cafe-emergency-receipt"
+            aria-label="Potwierdzenie wydania awaryjnego"
+          >
+            <p
+              className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+              role="status"
+            >
+              Wydano awaryjnie bez podpisu — wydania zapisane, stan magazynu
+              obniżony.
+            </p>
+            <dl className="space-y-1 text-sm text-zinc-700">
+              <div className="flex justify-between gap-4">
+                <dt className="text-zinc-500">Wydał</dt>
+                <dd
+                  className="font-medium text-zinc-900"
+                  data-testid="cafe-emergency-by"
+                >
+                  {actorLabel ?? "—"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-zinc-500">Czas wydania</dt>
+                <dd
+                  className="font-medium text-zinc-900"
+                  data-testid="cafe-emergency-at"
+                >
+                  {doc.signedAt
+                    ? doc.signedAt.toLocaleString("pl-PL")
+                    : "—"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-zinc-500">Powód</dt>
+                <dd
+                  className="font-medium text-zinc-900"
+                  data-testid="cafe-emergency-reason"
+                >
+                  {doc.emergencyNote ?? "—"}
+                </dd>
+              </div>
+            </dl>
+          </section>
         ) : (
           <section
             className="space-y-3"
@@ -103,7 +151,7 @@ export default async function CafeIssueDetailPage({ params }: PageProps) {
               <div className="flex justify-between gap-4">
                 <dt className="text-zinc-500">Podpisał</dt>
                 <dd className="font-medium text-zinc-900" data-testid="cafe-signed-by">
-                  {signerLabel ?? "—"}
+                  {actorLabel ?? "—"}
                 </dd>
               </div>
               <div className="flex justify-between gap-4">
