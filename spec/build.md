@@ -10,7 +10,7 @@
 
 ## NOW
 
-- F010 · Magazynier lands on scan hub and process tiles (scan-first + Przyjmij / Wydaj / Przenieś / Historia)
+- F010 · Magazynier lands on scan hub and process tiles (scan-first + Przyjmij / Wydaj / Przenieś / Historia) — active
 
 ## NEXT
 
