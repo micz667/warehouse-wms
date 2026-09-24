@@ -5,15 +5,23 @@
 - Greenfield `micz667/warehouse-wms`. Limen board + Cursor pack in repo.
 - Stack: Next.js App Router, Postgres, Prisma, Auth.js, Tailwind, Android PWA scan.
 - MVP locked in conversation 2026-09-22; Symfonia mapping dropped for now.
-- **MVP board complete** — F001–F009 proven; no further planned MVP slices.
+- **MVP board complete** — F001–F009 proven.
+- **Post-MVP hall UX slice** — hybrid entry (scan hub + process tiles), cafe issue signature rule, floor gestures over menu navigation; hard domain (roles, catalog, stock-from-movements) unchanged. Symfonia still out of scope.
 
 ## NOW
 
-- (empty — MVP board complete)
+- F010 · Magazynier lands on scan hub and process tiles (scan-first + Przyjmij / Wydaj / Przenieś / Historia)
 
 ## NEXT
 
-- (empty)
+- F011 · Receive by scan with inline catalog add (unknown barcode → POC-style create, then finish receive)
+- F012 · Shelf transfer and where-is lookup (shelf↔shelf; stock+locations for an item)
+- F013 · Two-step cafe issue with signature (hall prepare → on-site finger signature → stock leaves)
+- F014 · Movement history on the product card
+- F015 · Wrong-movement correction and label reprint (storno / opposite movement; reprint/reattach)
+- F016 · Good return and return-to-renovation (shelf vs renovation → batch vendor issue)
+- F017 · Inventory session with variances (count → variances → approve correcting movements)
+- F018 · Emergency issue without signature (conscious, logged bypass)
 
 ## PROVEN
 

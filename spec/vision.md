@@ -14,7 +14,8 @@
 
 ## Current direction
 
-- Build MVP on Next.js + Postgres + Prisma + Auth.js as an Android-first PWA.
-- MVP slice order: foundation → auth/roles → catalog + barcodes → locations → stocktake opening → stock from movements → scanned receipt/transfer/issue → architect shopping lists → admin audit.
-- Recurring stocktake with variance against system stock: decide later; design the catalog and movement model so it can land without a rewrite.
-- Deferred: Symfonia export, Symfonia product import/mapping, offline-first transactions, reservations/picking, multi-warehouse, native/Zebra.
+- MVP (F001–F009) is proven on Next.js + Postgres + Prisma + Auth.js as an Android-first PWA. Hard domain stays: roles, durable catalog, stock only as sum of movements.
+- Post-MVP hall UX: hybrid entry — default scan hub plus process tiles (Przyjmij / Wydaj / Przenieś / Historia; Inwentaryzacja and Renowacja as further shortcuts). Procedures stay under the hood; the hall supports gestures, not system-menu navigation. Scan barcode or location first; the system asks only for missing fields. Unknown barcodes can open inline catalog add during receive.
+- Cafe issue is two-step: hall prepares a document (in-transit / prepared); stock leaves the warehouse only after on-site finger signature — or a conscious, logged “issue without signature” emergency. Wrong moves correct via storno/opposite movement; good returns vs renovation; inventory sessions beyond opening stocktake.
+- Symfonia export and Symfonia product import/mapping stay out of scope for this horizon.
+- Deferred: offline-first transactions, reservations/picking, multi-warehouse, native/Zebra.
