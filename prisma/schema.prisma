@@ -87,10 +87,14 @@ model CatalogItem {
 }
 
 /// Flat hall location. `code` is the scannable Code128 value (unique).
+/// Renovation section locations (`isRenovation`) hold damaged/dirty returns
+/// until batch vendor issue — still ordinary locations; stock = SUM(movements).
 model Location {
   id                  String          @id @default(cuid())
   code                String          @unique
   label               String
+  /// When true, this location is part of the renovation section (F016).
+  isRenovation        Boolean         @default(false)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   stocktakeLines      StocktakeLine[]
@@ -99,6 +103,7 @@ model Location {
   cafeIssueLineSources CafeIssueLine[] @relation("CafeIssueLineSource")
 
   @@index([label])
+  @@index([isRenovation])
 }
 
 /// Physical stocktake session (`spis z natury`). Opening stock is posted only on approve.

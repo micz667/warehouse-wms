@@ -8,6 +8,7 @@ export function LocationCreateForm() {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [label, setLabel] = useState("");
+  const [isRenovation, setIsRenovation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -19,7 +20,7 @@ export function LocationCreateForm() {
       const res = await fetch("/api/locations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, label }),
+        body: JSON.stringify({ code, label, isRenovation }),
       });
       const body = (await res.json().catch(() => null)) as
         | { location?: { id: string }; error?: string }
@@ -71,6 +72,19 @@ export function LocationCreateForm() {
             className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
             placeholder="np. Regał A, półka 1"
           />
+        </label>
+        <label className="flex items-center gap-2" htmlFor="isRenovation">
+          <input
+            id="isRenovation"
+            type="checkbox"
+            checked={isRenovation}
+            onChange={(e) => setIsRenovation(e.target.checked)}
+            className="size-4 rounded border-zinc-300"
+            data-testid="location-is-renovation"
+          />
+          <span className="text-sm text-zinc-800">
+            Sekcja renowacji (zwroty uszkodzone / brudne)
+          </span>
         </label>
       </div>
 

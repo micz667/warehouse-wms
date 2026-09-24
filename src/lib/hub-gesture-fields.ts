@@ -9,6 +9,8 @@ export type HubGesture =
   | "przyjmij"
   | "wydaj"
   | "przenies"
+  | "zwrot"
+  | "renowacja"
   | "gdzie"
   | "historia";
 
@@ -37,6 +39,14 @@ export function missingFieldsAfterHubScan(
       if (scanKind === "item") return ["fromLocation", "toLocation", "qty"];
       // Location scan prefills source; still need destination (+ item + qty).
       return ["item", "toLocation", "qty"];
+    case "zwrot":
+      // Good return onto a shelf — same missing fields as przyjmij, distinct path.
+      if (scanKind === "item") return ["location", "qty"];
+      return ["item", "qty"];
+    case "renowacja":
+      // Return to renovation section location.
+      if (scanKind === "item") return ["location", "qty"];
+      return ["item", "qty"];
     case "gdzie":
       // Item scan is enough; location scan cannot answer “where is X?”.
       if (scanKind === "item") return [];
@@ -75,7 +85,11 @@ export function hubGestureHref(
       ? "/ruchy/przyjecie"
       : gesture === "wydaj"
         ? "/ruchy/wydanie"
-        : "/ruchy/przesuniecie";
+        : gesture === "zwrot"
+          ? "/ruchy/zwrot"
+          : gesture === "renowacja"
+            ? "/renowacja/zwrot"
+            : "/ruchy/przesuniecie";
 
   const params = new URLSearchParams();
   if (scan.kind === "item") {
