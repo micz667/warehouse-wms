@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   ItemScanField,
   type ScannedCatalogItem,
@@ -26,45 +26,34 @@ export function LocateItem({ initialItem = null }: Props) {
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [total, setTotal] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  const load = useCallback((catalogItemId: string) => {
+    startTransition(async () => {
+      setError(null);
+      const res = await fetch(
+        `/api/stock/item/${encodeURIComponent(catalogItemId)}`,
+      );
+      const body = (await res.json().catch(() => null)) as {
+        error?: string;
+        locations?: LocationRow[];
+        total?: string;
+      } | null;
+      if (!res.ok || !body?.locations || body.total === undefined) {
+        setError(body?.error ?? "Nie udało się pobrać lokalizacji");
+        setLocations([]);
+        setTotal(null);
+        return;
+      }
+      setLocations(body.locations);
+      setTotal(body.total);
+    });
+  }, []);
 
   useEffect(() => {
-    if (!item) {
-      setLocations([]);
-      setTotal(null);
-      return;
-    }
-
-    let cancelled = false;
-    setPending(true);
-    setError(null);
-    void (async () => {
-      try {
-        const res = await fetch(`/api/stock/item/${encodeURIComponent(item.id)}`);
-        const body = (await res.json().catch(() => null)) as {
-          error?: string;
-          locations?: LocationRow[];
-          total?: string;
-          item?: { unit: string };
-        } | null;
-        if (cancelled) return;
-        if (!res.ok || !body?.locations || body.total === undefined) {
-          setError(body?.error ?? "Nie udało się pobrać lokalizacji");
-          setLocations([]);
-          setTotal(null);
-          return;
-        }
-        setLocations(body.locations);
-        setTotal(body.total);
-      } finally {
-        if (!cancelled) setPending(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [item]);
+    if (!item) return;
+    load(item.id);
+  }, [item, load]);
 
   return (
     <div className="mx-auto w-full max-w-lg space-y-6 px-6 py-8">
@@ -82,6 +71,10 @@ export function LocateItem({ initialItem = null }: Props) {
         onSelect={(next) => {
           setItem(next);
           setError(null);
+          if (!next) {
+            setLocations([]);
+            setTotal(null);
+          }
         }}
       />
 

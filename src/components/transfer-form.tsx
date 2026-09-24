@@ -37,10 +37,7 @@ export function TransferForm({
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    if (!item || !from) {
-      setAvailable(null);
-      return;
-    }
+    if (!item || !from) return;
     let cancelled = false;
     void (async () => {
       const res = await fetch(`/api/stock/item/${encodeURIComponent(item.id)}`);
@@ -134,6 +131,7 @@ export function TransferForm({
           selected={from}
           onSelect={(loc) => {
             setFrom(loc);
+            setAvailable(null);
             setOk(null);
           }}
         />
@@ -155,6 +153,7 @@ export function TransferForm({
           selected={item}
           onSelect={(next) => {
             setItem(next);
+            setAvailable(null);
             setOk(null);
           }}
         />
