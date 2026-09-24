@@ -17,14 +17,15 @@ A magazynier completes **Przenieś** as a floor gesture (source shelf → item �
 3. Looking up an item shows each location with positive balance and the qty — same DB prove (`listItemLocations`).
 4. Zero-balance locations are not listed as holding stock — same DB prove (drained loc A omitted; never-touched loc C omitted).
 
-`npm run check` on clean candidate (see PR / final commit after board):
+`npm run check` on clean candidate `3d9b0f5`:
 
 ```
-> warehouse-wms@0.1.0 prove:transfer-locate
+> warehouse-wms@0.1.0 check
+> … prove:transfer-locate …
 prove-transfer-locate: ok (Przenieś seams · gdzie leży · zero omit · hub/product reach)
-
-> warehouse-wms@0.1.0 prove:transfer-locate-db
+> … prove:transfer-locate-db …
 prove-transfer-locate-db: ok (paired transfer · refuse negative · locate positive only)
+… all prior proves ok …
 ```
 
 ## Key routes / seams
