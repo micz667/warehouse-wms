@@ -10,10 +10,11 @@
 
 ## NOW
 
-- F013 · Two-step cafe issue with signature (hall prepare → on-site finger signature → stock leaves)
+- F013a · Cafe issue prepare / build package (hall)
 
 ## NEXT
 
+- F013b · Cafe signature and receipt
 - F014 · Movement history on the product card
 - F015 · Wrong-movement correction and label reprint (storno / opposite movement; reprint/reattach)
 - F016 · Good return and return-to-renovation (shelf vs renovation → batch vendor issue)

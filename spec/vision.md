@@ -16,6 +16,6 @@
 
 - MVP (F001–F009) is proven on Next.js + Postgres + Prisma + Auth.js as an Android-first PWA. Hard domain stays: roles, durable catalog, stock only as sum of movements.
 - Post-MVP hall UX: hybrid entry — default scan hub plus process tiles (Przyjmij / Wydaj / Przenieś / Historia; Inwentaryzacja and Renowacja as further shortcuts). Procedures stay under the hood; the hall supports gestures, not system-menu navigation. Scan barcode or location first; the system asks only for missing fields. Unknown barcodes can open inline catalog add during receive.
-- Cafe issue is two-step: hall prepares a document (in-transit / prepared); stock leaves the warehouse only after on-site finger signature — or a conscious, logged “issue without signature” emergency. Wrong moves correct via storno/opposite movement; good returns vs renovation; inventory sessions beyond opening stocktake.
+- Cafe issue ships in two slices: hall prepare builds a package/document (in-transit / prepared) without stock leaving; then cafe finger signature/receipt posts the issue and stock leaves — or a conscious, logged “issue without signature” emergency (F018) bypasses signature on a prepared document. Wrong moves correct via storno/opposite movement; good returns vs renovation; inventory sessions beyond opening stocktake.
 - Symfonia export and Symfonia product import/mapping stay out of scope for this horizon.
 - Deferred: offline-first transactions, reservations/picking, multi-warehouse, native/Zebra.
