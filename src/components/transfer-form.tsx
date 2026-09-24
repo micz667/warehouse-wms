@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ItemScanField,
   type ScannedCatalogItem,
@@ -16,6 +16,9 @@ type Props = {
   fromHub?: boolean;
 };
 
+/**
+ * Hall Przenieś: shelf → shelf via scan. Posts paired transfer movements (F007).
+ */
 export function TransferForm({
   canWrite,
   initialItem = null,
@@ -27,9 +30,29 @@ export function TransferForm({
   const [from, setFrom] = useState<PickedLocation | null>(initialFrom);
   const [to, setTo] = useState<PickedLocation | null>(initialTo);
   const [qty, setQty] = useState("");
+  const [available, setAvailable] = useState<string | null>(null);
+  const [stockTick, setStockTick] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!item || !from) return;
+    let cancelled = false;
+    void (async () => {
+      const res = await fetch(`/api/stock/item/${encodeURIComponent(item.id)}`);
+      if (!res.ok || cancelled) return;
+      const body = (await res.json().catch(() => null)) as {
+        locations?: { locationId: string; qty: string }[];
+      } | null;
+      if (cancelled || !body?.locations) return;
+      const row = body.locations.find((l) => l.locationId === from.id);
+      setAvailable(row?.qty ?? "0");
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [item, from, stockTick]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -54,42 +77,65 @@ export function TransferForm({
         to?: { qty: string };
       } | null;
       if (!res.ok || !body?.from || !body?.to) {
-        setError(body?.error ?? "Nie udało się zapisać przesunięcia");
+        setError(body?.error ?? "Nie udało się przenieść towaru");
         return;
       }
-      setOk(
-        `Przesunięto ${qty}: ${from.code} → ${to.code} (${item.name})`,
-      );
+      setOk(`Przeniesiono ${qty}: ${from.code} → ${to.code} (${item.name})`);
       setQty("");
+      setStockTick((n) => n + 1);
     } finally {
       setPending(false);
     }
   }
 
   const missing: string[] = [];
+  if (!from) missing.push("półkę źródłową");
   if (!item) missing.push("pozycję");
-  if (!from) missing.push("lokalizację źródłową");
-  if (!to) missing.push("lokalizację docelową");
+  if (!to) missing.push("półkę docelową");
   if (!qty.trim()) missing.push("ilość");
 
   return (
-    <form className="mx-auto w-full max-w-lg space-y-6 px-6 py-8" onSubmit={submit}>
+    <form
+      className="mx-auto w-full max-w-lg space-y-6 px-6 py-8"
+      onSubmit={submit}
+    >
       <div>
         <h1 className="text-3xl font-semibold tracking-tight text-zinc-900">
-          Przesunięcie
+          Przenieś
         </h1>
         <p className="mt-1 text-zinc-600">
           {fromHub && (initialItem || initialFrom || initialTo)
-            ? `Dokończ przesunięcie — brakuje: ${missing.join(", ") || "potwierdzenia"}.`
-            : "Para ruchów transfer: −źródło i +cel o tej samej ilości."}
+            ? `Dokończ przeniesienie — brakuje: ${missing.join(", ") || "potwierdzenia"}.`
+            : "Z półki na półkę: źródło → pozycja → cel → ilość."}
         </p>
       </div>
 
       {!canWrite ? (
         <p className="text-sm text-amber-800" role="status">
-          Podgląd — tylko magazynier i administrator mogą przesuwać towar.
+          Podgląd — tylko magazynier i administrator mogą przenosić towar.
         </p>
       ) : null}
+
+      {initialFrom && fromHub && from ? (
+        <div
+          className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
+          data-testid="picked-location"
+          data-location-id={from.id}
+        >
+          Źródło: <strong>{from.label}</strong>{" "}
+          <span className="font-mono">({from.code})</span>
+        </div>
+      ) : (
+        <LocationField
+          label="Półka źródłowa"
+          selected={from}
+          onSelect={(loc) => {
+            setFrom(loc);
+            setAvailable(null);
+            setOk(null);
+          }}
+        />
+      )}
 
       {initialItem && fromHub && item ? (
         <div
@@ -107,30 +153,24 @@ export function TransferForm({
           selected={item}
           onSelect={(next) => {
             setItem(next);
+            setAvailable(null);
             setOk(null);
           }}
         />
       )}
 
-      {initialFrom && fromHub && from ? (
-        <div
-          className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
-          data-testid="picked-location"
-          data-location-id={from.id}
+      {item && from && available !== null ? (
+        <p
+          className="text-sm text-zinc-600"
+          data-testid="transfer-available"
+          role="status"
         >
-          Źródło: <strong>{from.label}</strong>{" "}
-          <span className="font-mono">({from.code})</span>
-        </div>
-      ) : (
-        <LocationField
-          label="Lokalizacja źródłowa"
-          selected={from}
-          onSelect={(loc) => {
-            setFrom(loc);
-            setOk(null);
-          }}
-        />
-      )}
+          Na źródle:{" "}
+          <strong className="tabular-nums text-zinc-900">
+            {available} {item.unit}
+          </strong>
+        </p>
+      ) : null}
 
       {initialTo && fromHub && to ? (
         <div
@@ -143,7 +183,7 @@ export function TransferForm({
         </div>
       ) : (
         <LocationField
-          label="Lokalizacja docelowa"
+          label="Półka docelowa"
           selected={to}
           onSelect={(loc) => {
             setTo(loc);
@@ -181,7 +221,7 @@ export function TransferForm({
         disabled={!canWrite || pending || !item || !from || !to}
         className="w-full rounded bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
       >
-        {pending ? "Zapisywanie…" : "Zapisz przesunięcie"}
+        {pending ? "Przenoszenie…" : "Przenieś"}
       </button>
     </form>
   );

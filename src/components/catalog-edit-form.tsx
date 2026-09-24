@@ -96,12 +96,21 @@ export function CatalogEditForm({ item, canWrite }: Props) {
           </h1>
           <p className="mt-1 font-mono text-sm text-zinc-500">{item.barcode}</p>
         </div>
-        <Link
-          href={`/katalog/${item.id}/etykieta`}
-          className="shrink-0 rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
-        >
-          Etykieta
-        </Link>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <Link
+            href={`/gdzie?itemId=${encodeURIComponent(item.id)}`}
+            className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
+            data-testid="catalog-locate-link"
+          >
+            Gdzie leży?
+          </Link>
+          <Link
+            href={`/katalog/${item.id}/etykieta`}
+            className="rounded border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
+          >
+            Etykieta
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 flex items-center gap-4">

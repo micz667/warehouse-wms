@@ -28,7 +28,7 @@ export default async function PrzesunieciePage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-1 flex-col">
-      <AppHeader title="Przesunięcie" />
+      <AppHeader title="Przenieś" />
       <TransferForm
         canWrite={canWrite}
         initialItem={prefill.item}

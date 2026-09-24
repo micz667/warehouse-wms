@@ -15,8 +15,13 @@ const FLOWS = [
   },
   {
     href: "/ruchy/przesuniecie",
-    title: "Przesunięcie",
-    blurb: "Z lokalizacji na lokalizację — para ruchów transfer.",
+    title: "Przenieś",
+    blurb: "Z półki na półkę — skan źródła, pozycji i celu.",
+  },
+  {
+    href: "/gdzie",
+    title: "Gdzie leży?",
+    blurb: "Lokalizacje i stan jednej pozycji.",
   },
   {
     href: "/ruchy/wydanie",
