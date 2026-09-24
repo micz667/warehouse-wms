@@ -29,7 +29,12 @@ const PROCESS_TILES = [
   {
     href: "/ruchy/przesuniecie",
     title: "Przenieś",
-    blurb: "Z lokalizacji na lokalizację.",
+    blurb: "Z półki na półkę.",
+  },
+  {
+    href: "/gdzie",
+    title: "Gdzie leży?",
+    blurb: "Gdzie leży pozycja X?",
   },
   {
     href: "/ruchy/historia",
@@ -41,10 +46,13 @@ const PROCESS_TILES = [
 const GESTURE_CHOICES: {
   gesture: HubGesture;
   title: string;
+  /** When set, only offer this gesture for that scan kind. */
+  onlyFor?: "item" | "location";
 }[] = [
   { gesture: "przyjmij", title: "Przyjmij" },
   { gesture: "wydaj", title: "Wydaj" },
   { gesture: "przenies", title: "Przenieś" },
+  { gesture: "gdzie", title: "Gdzie leży?", onlyFor: "item" },
 ];
 
 const FIELD_LABEL_PL: Record<string, string> = {
@@ -150,8 +158,11 @@ export function ScanHub() {
             <p className="text-sm text-zinc-700">
               Co chcesz zrobić? Formularz zapyta tylko o brakujące pola.
             </p>
-            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {GESTURE_CHOICES.map((choice) => {
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {GESTURE_CHOICES.filter(
+                (choice) =>
+                  !choice.onlyFor || choice.onlyFor === resolved.kind,
+              ).map((choice) => {
                 const scan =
                   resolved.kind === "item"
                     ? { kind: "item" as const, id: resolved.item.id }
@@ -164,6 +175,10 @@ export function ScanHub() {
                   resolved.kind,
                   choice.gesture,
                 );
+                const missingLabel =
+                  missing.length === 0
+                    ? "od razu"
+                    : missing.map((f) => FIELD_LABEL_PL[f]).join(", ");
                 return (
                   <li key={choice.gesture}>
                     <Link
@@ -174,8 +189,9 @@ export function ScanHub() {
                     >
                       {choice.title}
                       <span className="mt-1 block text-xs font-normal text-zinc-300">
-                        Brakuje:{" "}
-                        {missing.map((f) => FIELD_LABEL_PL[f]).join(", ")}
+                        {missing.length === 0
+                          ? "Gotowe po skanie"
+                          : `Brakuje: ${missingLabel}`}
                       </span>
                     </Link>
                   </li>
