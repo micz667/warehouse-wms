@@ -41,3 +41,13 @@ prove-receive-scan-db: ok (known receipt · inline create+receipt · catalog sea
 
 - Out of scope held: cafe issue, transfer, return, Symfonia import.
 - Photo skipped (optional if easy from F003 — not required for hall POC fields).
+
+## Browser smoke (mag@local)
+
+At running `npm start` on localhost:3000 after seed:
+
+- Przyjmij + unknown `F011SMOKE999` → inline Nazwa/Tagi/Opis/Kod (stayed on `/ruchy/przyjecie`).
+- Zapisz pozycję → picked item; qty 2 + A-01 → `Przyjęto 2 → A-01`; receipt rows in DB.
+- `/katalog` search `F011SMOKE999` → Farba test F011 with that barcode.
+
+Frames: `/opt/cursor/artifacts/screenshots/f011-inline-create.webp`, `f011-receipt-ok.webp`, `f011-catalog-search.webp`.
