@@ -14,10 +14,19 @@ export type ScannedCatalogItem = {
 type Props = {
   onSelect: (item: ScannedCatalogItem | null) => void;
   selected: ScannedCatalogItem | null;
+  /**
+   * When set, a 404 barcode does not only error — caller can open inline create
+   * (F011 Przyjmij). Other movement forms omit this.
+   */
+  onUnknownBarcode?: (barcode: string) => void;
 };
 
 /** Item resolve: camera scan or typed barcode fallback. */
-export function ItemScanField({ onSelect, selected }: Props) {
+export function ItemScanField({
+  onSelect,
+  selected,
+  onUnknownBarcode,
+}: Props) {
   const [manual, setManual] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [cameraOn, setCameraOn] = useState(false);
@@ -33,6 +42,12 @@ export function ItemScanField({ onSelect, selected }: Props) {
         `/api/catalog/by-barcode/${encodeURIComponent(code)}`,
       );
       if (!res.ok) {
+        if (res.status === 404 && onUnknownBarcode) {
+          onUnknownBarcode(code);
+          setManual("");
+          setCameraOn(false);
+          return;
+        }
         const body = (await res.json().catch(() => null)) as {
           error?: string;
         } | null;

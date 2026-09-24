@@ -61,6 +61,8 @@ model CatalogItem {
   category         String
   unit             String
   barcode          String             @unique
+  /// Free-text note from hall inline create (F011); optional on admin CRUD.
+  description      String?
   photoPath        String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt

@@ -19,6 +19,7 @@ export async function listCatalogItems(
         { sku: { contains: q, mode: "insensitive" } },
         { barcode: { contains: q, mode: "insensitive" } },
         { category: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
       ],
     },
     orderBy: [{ name: "asc" }, { sku: "asc" }],

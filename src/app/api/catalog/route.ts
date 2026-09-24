@@ -50,10 +50,13 @@ export async function POST(request: Request) {
 
   const record = body as Record<string, unknown>;
   const result = await createCatalogItem(prisma, {
-    sku: typeof record.sku === "string" ? record.sku : "",
+    sku: typeof record.sku === "string" ? record.sku : undefined,
     name: typeof record.name === "string" ? record.name : "",
     category: typeof record.category === "string" ? record.category : "",
     unit: typeof record.unit === "string" ? record.unit : "",
+    description:
+      typeof record.description === "string" ? record.description : null,
+    barcode: typeof record.barcode === "string" ? record.barcode : undefined,
   });
 
   if (!result.ok) {
