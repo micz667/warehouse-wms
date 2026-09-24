@@ -12,7 +12,7 @@ Returned goods take one of two hall paths: good return goes back onto a shelf; d
 ## Out of scope
 
 - Full vendor RMA / purchase credit documents in Symfonia.
-- Cafe signature issue (F013).
+- Cafe issue prepare and signature receipt (F013 / F013b).
 
 ## Acceptance
 
