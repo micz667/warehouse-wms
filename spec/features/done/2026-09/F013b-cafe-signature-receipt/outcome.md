@@ -18,6 +18,14 @@ At the cafe, a magazynier opens a prepared paczka and the recipient finger-signs
 3. Signature actor and timestamp visible on the document — same DB prove (`signedBy` / `signedAt`) + `/ruchy/wydanie/[id]` receipt block.
 4. Signing applies only to an existing prepared cafe issue — re-sign and missing id blocked in DB prove; domain checks `status === "prepared"`.
 
+`npm run check` on clean candidate `60e27b1` (working tree clean):
+
+```
+prove-cafe-signature: ok (roles · sign posts issue · pad/API · prepared-only · no nested form)
+prove-cafe-signature-db: ok (sign posts issue · stock down · no-sign stays · actor/ts · prepared-only)
+… full native lane green (lint · typecheck · prisma validate · all prior proves) …
+```
+
 ## Key routes / seams
 
 - UI: `src/components/cafe-signature-pad.tsx` on `/ruchy/wydanie/[id]` (prepared); receipt metadata when `received`
