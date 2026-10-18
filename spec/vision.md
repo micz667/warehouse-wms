@@ -19,3 +19,7 @@
 - Cafe issue ships in two slices: hall prepare builds a package/document (in-transit / prepared) without stock leaving; then cafe finger signature/receipt posts the issue and stock leaves — or a conscious, logged “issue without signature” emergency (F018) bypasses signature on a prepared document. Wrong moves correct via storno/opposite movement; good returns vs renovation; inventory sessions beyond opening stocktake.
 - Symfonia export and Symfonia product import/mapping stay out of scope for this horizon.
 - Deferred: offline-first transactions, reservations/picking, multi-warehouse, native/Zebra.
+
+## Wymogi prawne
+
+Research and accountant questionnaire for value-based warehouse records (FIFO, Symfonia FK stays, KSeF out of scope): [legal-requirements.md](./legal-requirements.md), [pytania-do-ksiegowej.md](./pytania-do-ksiegowej.md).
