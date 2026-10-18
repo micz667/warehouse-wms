@@ -27,7 +27,6 @@ async function main() {
   });
 
   const item = await createCatalogItem(prisma, {
-    sku: `F012-${suffix}`,
     name: `F012 pozycja ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -174,7 +173,6 @@ async function main() {
 
   // Empty item still returns ok with empty locations
   const emptyItem = await createCatalogItem(prisma, {
-    sku: `F012E-${suffix}`,
     name: `F012 empty ${suffix}`,
     category: "Test",
     unit: "szt",

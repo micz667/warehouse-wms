@@ -50,20 +50,28 @@ export async function POST(request: Request) {
 
   const record = body as Record<string, unknown>;
   const result = await createCatalogItem(prisma, {
-    sku: typeof record.sku === "string" ? record.sku : undefined,
     name: typeof record.name === "string" ? record.name : "",
     category: typeof record.category === "string" ? record.category : "",
     unit: typeof record.unit === "string" ? record.unit : "",
     description:
       typeof record.description === "string" ? record.description : null,
-    barcode: typeof record.barcode === "string" ? record.barcode : undefined,
+    // Scanned manufacturer code from inline receive (F011/F020).
+    externalBarcode:
+      typeof record.externalBarcode === "string"
+        ? record.externalBarcode
+        : typeof record.barcode === "string"
+          ? record.barcode
+          : null,
   });
 
   if (!result.ok) {
     const status =
       result.error === "validation"
         ? 400
-        : result.error === "sku_taken" || result.error === "barcode_taken"
+        : result.error === "sku_taken" ||
+            result.error === "barcode_taken" ||
+            result.error === "external_barcode_taken" ||
+            result.error === "source_ref_taken"
           ? 409
           : 400;
     return Response.json({ error: result.message }, { status });

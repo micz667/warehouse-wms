@@ -63,7 +63,6 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
   const [itemHits, setItemHits] = useState<CatalogHit[]>([]);
   const [pickedItem, setPickedItem] = useState<CatalogHit | null>(null);
   const [createNew, setCreateNew] = useState(false);
-  const [newSku, setNewSku] = useState("");
   const [newName, setNewName] = useState("");
   const [newCategory, setNewCategory] = useState("Ogólne");
   const [newUnit, setNewUnit] = useState("szt");
@@ -180,7 +179,6 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
       };
       if (createNew) {
         payload.newItem = {
-          sku: newSku,
           name: newName,
           category: newCategory,
           unit: newUnit,
@@ -210,7 +208,6 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
       setItemQuery("");
       setItemHits([]);
       setCreateNew(false);
-      setNewSku("");
       setNewName("");
       load();
     } finally {
@@ -402,14 +399,6 @@ export function StocktakeSessionPanel({ sessionId, canWrite }: Props) {
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="SKU">
-                <input
-                  required={createNew}
-                  value={newSku}
-                  onChange={(e) => setNewSku(e.target.value)}
-                  className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
-                />
-              </Field>
               <Field label="Nazwa">
                 <input
                   required={createNew}

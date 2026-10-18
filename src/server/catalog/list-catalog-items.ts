@@ -18,6 +18,8 @@ export async function listCatalogItems(
         { name: { contains: q, mode: "insensitive" } },
         { sku: { contains: q, mode: "insensitive" } },
         { barcode: { contains: q, mode: "insensitive" } },
+        { externalBarcode: { contains: q, mode: "insensitive" } },
+        { sourceRef: { contains: q, mode: "insensitive" } },
         { category: { contains: q, mode: "insensitive" } },
         { description: { contains: q, mode: "insensitive" } },
       ],

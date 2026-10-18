@@ -34,7 +34,6 @@ async function main() {
 
   // 1) Known barcode → receipt at chosen location for entered qty
   const known = await createCatalogItem(prisma, {
-    sku: `F011K-${suffix}`,
     name: `F011 known ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -75,9 +74,11 @@ async function main() {
   });
   assert.equal(created.ok, true);
   if (!created.ok) throw new Error("inline catalog create failed");
-  assert.equal(created.item.barcode, scanned);
+  // Warehouse code is category-prefix; scanned manufacturer code is external.
+  assert.match(created.item.sku, /^[A-Z]{2,4}-\d+$/);
+  assert.equal(created.item.barcode, created.item.sku);
+  assert.equal(created.item.externalBarcode, scanned);
   assert.equal(created.item.description, `Opis poc ${suffix}`);
-  assert.match(created.item.sku, /^R-/);
 
   const receiptNew = await postReceipt(prisma, {
     catalogItemId: created.item.id,
@@ -90,15 +91,20 @@ async function main() {
   assert.equal(receiptNew.movement.catalogItemId, created.item.id);
   assert.equal(receiptNew.movement.qty.toString(), "3");
 
-  // 4) New item appears in searchable catalog with scanned barcode
+  // 4) New item resolves by manufacturer barcode and warehouse code
   const byBarcode = await findCatalogByBarcode(prisma, scanned);
   assert.ok(byBarcode);
   assert.equal(byBarcode?.id, created.item.id);
+  const byWarehouse = await findCatalogByBarcode(prisma, created.item.barcode);
+  assert.equal(byWarehouse?.id, created.item.id);
 
   const listed = await listCatalogItems(prisma, scanned);
   assert.ok(
-    listed.some((row) => row.id === created.item.id && row.barcode === scanned),
-    "search by barcode must return the inline-created item",
+    listed.some(
+      (row) =>
+        row.id === created.item.id && row.externalBarcode === scanned,
+    ),
+    "search by manufacturer barcode must return the inline-created item",
   );
 
   const listedByDesc = await listCatalogItems(prisma, `Opis poc ${suffix}`);

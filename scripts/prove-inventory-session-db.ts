@@ -22,7 +22,6 @@ async function main() {
   const suffix = Date.now().toString(36);
 
   const item = await createCatalogItem(prisma, {
-    sku: `INV-${suffix}`,
     name: `Inwentaryzacja ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -31,7 +30,6 @@ async function main() {
   if (!item.ok) throw new Error("catalog create failed");
 
   const itemFlat = await createCatalogItem(prisma, {
-    sku: `INV-FLAT-${suffix}`,
     name: `Bez odchylenia ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -161,7 +159,6 @@ async function main() {
 
   // Opening path still works (F005 prove retained via separate session)
   const openItem = await createCatalogItem(prisma, {
-    sku: `OPEN-${suffix}`,
     name: `Otwarcie ${suffix}`,
     category: "Test",
     unit: "szt",

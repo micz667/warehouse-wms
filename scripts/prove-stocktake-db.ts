@@ -22,7 +22,6 @@ async function main() {
   const suffix = Date.now().toString(36);
 
   const item = await createCatalogItem(prisma, {
-    sku: `SKU-${suffix}`,
     name: `Pozycja spisu ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -31,7 +30,6 @@ async function main() {
   if (!item.ok) throw new Error("catalog create failed");
 
   const item2 = await createCatalogItem(prisma, {
-    sku: `SKU2-${suffix}`,
     name: `Druga ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -79,7 +77,6 @@ async function main() {
     locationId: loc.location.id,
     countedQty: 1,
     newItem: {
-      sku: `INLINE-${suffix}`,
       name: `Inline ${suffix}`,
       category: "Test",
       unit: "szt",

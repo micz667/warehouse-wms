@@ -73,6 +73,8 @@ model User {
 
 /// Durable catalog SKU. Barcode is Code128-compatible (alphanumeric).
 /// Stock quantity is never stored here — balances come from movements.
+/// F020: `sku` and `barcode` are the same category-prefix code (e.g. KRZ-0042).
+/// Codes are immutable once assigned — changing `category` does not renumber.
 model CatalogItem {
   id               String             @id @default(cuid())
   sku              String             @unique
@@ -80,6 +82,11 @@ model CatalogItem {
   category         String
   unit             String
   barcode          String             @unique
+  /// Manufacturer / factory barcode (EAN etc.) when it differs from our code.
+  /// Scan hub resolves this as well as `barcode`.
+  externalBarcode  String?            @unique
+  /// Import / migration identity (e.g. `poc:<cuid>`). Not printed on labels.
+  sourceRef        String?            @unique
   /// Free-text note from hall inline create (F011); optional on admin CRUD.
   description      String?
   photoPath        String?
@@ -92,6 +99,21 @@ model CatalogItem {
 
   @@index([name])
   @@index([category])
+}
+
+/// Registry of catalog category → short ASCII prefix + sequence (F020).
+/// `category` is the exact CatalogItem.category string (unique).
+/// `prefix` is 2–4 uppercase ASCII letters (unique). Polish letters map to ASCII.
+model CategoryPrefix {
+  id         String   @id @default(cuid())
+  category   String   @unique
+  prefix     String   @unique
+  /// Next number to assign (1-based). Incremented atomically on allocate.
+  nextNumber Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([prefix])
 }
 
 /// Flat hall location. `code` is the scannable Code128 value (unique).

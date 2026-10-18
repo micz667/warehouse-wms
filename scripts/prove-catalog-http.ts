@@ -34,11 +34,9 @@ async function sessionCookie(role: Role, email: string): Promise<string> {
 
 async function main() {
   const suffix = Date.now().toString(36);
-  const sku = `PROVE-${suffix}`;
   const magCookie = await sessionCookie("magazynier", "mag@local");
 
   const created = await createCatalogItem(prisma, {
-    sku,
     name: `Pozycja testowa ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -47,20 +45,21 @@ async function main() {
     throw new Error(`create failed: ${created.message}`);
   }
 
-  const listed = await listCatalogItems(prisma, sku);
+  const listed = await listCatalogItems(prisma, created.item.sku);
   if (!listed.some((item) => item.id === created.item.id)) {
     throw new Error("created item missing from searchable list");
   }
 
   const dup = await createCatalogItem(prisma, {
-    sku: `OTHER-${suffix}`,
     name: "Duplikat kodu",
     category: "Test",
     unit: "szt",
     barcode: created.item.barcode,
   });
-  if (dup.ok || dup.error !== "barcode_taken") {
-    throw new Error("expected barcode_taken on duplicate barcode");
+  if (dup.ok || dup.error !== "external_barcode_taken") {
+    throw new Error(
+      `expected external_barcode_taken on duplicate code, got ${JSON.stringify(dup)}`,
+    );
   }
 
   const anon = await fetch(`${base}/api/catalog`, { method: "POST" });
@@ -75,7 +74,6 @@ async function main() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      sku: `ARCH-${suffix}`,
       name: "Arch blocked",
       category: "Test",
       unit: "szt",
@@ -92,7 +90,6 @@ async function main() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      sku: `MAG-${suffix}`,
       name: `Magazynier ${suffix}`,
       category: "Test",
       unit: "szt",

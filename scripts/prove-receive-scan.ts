@@ -1,16 +1,12 @@
 /**
- * Fast F011 gates — no DB: Przyjmij unknown-barcode → inline create seams;
- * catalog create accepts scanned barcode; SKU helper; no nested forms.
+ * Fast F011/F020 gates — no DB: Przyjmij unknown-barcode → inline create seams;
+ * catalog create accepts scanned barcode as external; no nested forms.
  */
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { skuFromScannedBarcode } from "../src/lib/sku-from-scanned-barcode";
 
 function main() {
-  assert.equal(skuFromScannedBarcode("ABC-123"), "R-ABC-123");
-  assert.match(skuFromScannedBarcode("  x!y@z  "), /^R-xyz$/);
-
   const receipt = readFileSync(
     join(process.cwd(), "src/components/receipt-form.tsx"),
     "utf8",
@@ -32,7 +28,7 @@ function main() {
   assert.match(inline, /Nazwa/);
   assert.match(inline, /Tagi/);
   assert.match(inline, /Opis/);
-  assert.match(inline, /Kod kreskowy/);
+  assert.match(inline, /Kod producenta/);
   assert.match(inline, /data-testid="inline-item-name"/);
   assert.match(inline, /data-testid="inline-item-tags"/);
   assert.match(inline, /data-testid="inline-item-description"/);
@@ -52,8 +48,10 @@ function main() {
     join(process.cwd(), "src/server/catalog/create-catalog-item.ts"),
     "utf8",
   );
-  assert.match(create, /skuFromScannedBarcode/);
+  assert.match(create, /allocateItemCode/);
+  assert.match(create, /externalBarcode/);
   assert.match(create, /description/);
+  assert.doesNotMatch(create, /skuFromScannedBarcode/);
 
   const catalogApi = readFileSync(
     join(process.cwd(), "src/app/api/catalog/route.ts"),
@@ -61,9 +59,10 @@ function main() {
   );
   assert.match(catalogApi, /barcode/);
   assert.match(catalogApi, /description/);
+  assert.match(catalogApi, /externalBarcode/);
 
   console.log(
-    "prove-receive-scan: ok (inline create seams · barcode create · no nested form)",
+    "prove-receive-scan: ok (inline create seams · category code · no nested form)",
   );
 }
 

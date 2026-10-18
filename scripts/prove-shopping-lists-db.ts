@@ -18,7 +18,6 @@ async function main() {
   const suffix = Date.now().toString(36);
 
   const itemA = await createCatalogItem(prisma, {
-    sku: `SL-A-${suffix}`,
     name: `Zakup A ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -27,7 +26,6 @@ async function main() {
   if (!itemA.ok) throw new Error("catalog create A failed");
 
   const itemB = await createCatalogItem(prisma, {
-    sku: `SL-B-${suffix}`,
     name: `Zakup B ${suffix}`,
     category: "Test",
     unit: "mb",

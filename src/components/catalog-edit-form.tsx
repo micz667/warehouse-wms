@@ -12,6 +12,7 @@ export type CatalogItemView = {
   category: string;
   unit: string;
   barcode: string;
+  externalBarcode?: string | null;
   photoPath: string | null;
 };
 
@@ -22,10 +23,12 @@ type Props = {
 
 export function CatalogEditForm({ item, canWrite }: Props) {
   const router = useRouter();
-  const [sku, setSku] = useState(item.sku);
   const [name, setName] = useState(item.name);
   const [category, setCategory] = useState(item.category);
   const [unit, setUnit] = useState(item.unit);
+  const [externalBarcode, setExternalBarcode] = useState(
+    item.externalBarcode ?? "",
+  );
   const [photoPath, setPhotoPath] = useState(item.photoPath);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -42,7 +45,12 @@ export function CatalogEditForm({ item, canWrite }: Props) {
       const res = await fetch(`/api/catalog/${item.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sku, name, category, unit }),
+        body: JSON.stringify({
+          name,
+          category,
+          unit,
+          externalBarcode: externalBarcode.trim() || null,
+        }),
       });
       const body = (await res.json().catch(() => null)) as
         | { item?: CatalogItemView; error?: string }
@@ -95,6 +103,9 @@ export function CatalogEditForm({ item, canWrite }: Props) {
             {item.name}
           </h1>
           <p className="mt-1 font-mono text-sm text-zinc-500">{item.barcode}</p>
+          <p className="mt-1 text-sm text-zinc-600">
+            Kategoria (bieżąca): {item.category}
+          </p>
         </div>
         <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
           <Link
@@ -149,19 +160,26 @@ export function CatalogEditForm({ item, canWrite }: Props) {
       </div>
 
       <div className="mt-6 overflow-x-auto rounded border border-zinc-200 bg-white p-4">
+        <p className="mb-2 text-center text-sm font-medium text-zinc-800">
+          {item.name}
+        </p>
         <BarcodeLabel value={item.barcode} />
       </div>
 
       <form onSubmit={onSave} className="mt-8 space-y-4">
-        <Field label="SKU" id="sku">
+        <Field label="Kod (SKU / Code128)" id="sku">
           <input
             id="sku"
-            required
-            value={sku}
-            onChange={(e) => setSku(e.target.value)}
-            disabled={!canWrite}
-            className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm disabled:bg-zinc-100"
+            value={item.sku}
+            readOnly
+            disabled
+            className="w-full rounded border border-zinc-300 bg-zinc-100 px-3 py-2 font-mono text-sm"
+            data-testid="catalog-code-readonly"
           />
+          <p className="mt-1 text-xs text-zinc-500">
+            Kod jest stały po przydzieleniu — zmiana kategorii nie zmienia
+            numeru (etykiety już wydrukowane).
+          </p>
         </Field>
         <Field label="Nazwa" id="name">
           <input
@@ -173,7 +191,7 @@ export function CatalogEditForm({ item, canWrite }: Props) {
             className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm disabled:bg-zinc-100"
           />
         </Field>
-        <Field label="Kategoria" id="category">
+        <Field label="Kategoria (bieżąca)" id="category">
           <input
             id="category"
             required
@@ -181,6 +199,7 @@ export function CatalogEditForm({ item, canWrite }: Props) {
             onChange={(e) => setCategory(e.target.value)}
             disabled={!canWrite}
             className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm disabled:bg-zinc-100"
+            data-testid="catalog-category-field"
           />
         </Field>
         <Field label="Jednostka" id="unit">
@@ -191,6 +210,16 @@ export function CatalogEditForm({ item, canWrite }: Props) {
             onChange={(e) => setUnit(e.target.value)}
             disabled={!canWrite}
             className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm disabled:bg-zinc-100"
+          />
+        </Field>
+        <Field label="Kod producenta (opcjonalny)" id="externalBarcode">
+          <input
+            id="externalBarcode"
+            value={externalBarcode}
+            onChange={(e) => setExternalBarcode(e.target.value)}
+            disabled={!canWrite}
+            className="w-full rounded border border-zinc-300 bg-white px-3 py-2 font-mono text-sm disabled:bg-zinc-100"
+            data-testid="catalog-external-barcode"
           />
         </Field>
 

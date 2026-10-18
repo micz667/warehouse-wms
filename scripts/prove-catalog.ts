@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { generateBarcodeValue } from "../src/server/catalog/generate-barcode";
+import { formatItemCode, parseItemCode } from "../src/server/category-prefixes/format-item-code";
+import { normalizePrefixLetters } from "../src/server/category-prefixes/normalize-prefix";
 import { gateRole } from "../src/server/gate-role";
 import {
   CATALOG_READ_ROLES,
@@ -7,11 +8,11 @@ import {
 } from "../src/server/catalog/roles";
 
 function main() {
-  const a = generateBarcodeValue();
-  const b = generateBarcodeValue();
-  assert.match(a, /^WMS[0-9A-F]{12}$/);
-  assert.match(b, /^WMS[0-9A-F]{12}$/);
-  assert.notEqual(a, b);
+  assert.equal(formatItemCode("KRZ", 42), "KRZ-0042");
+  assert.equal(formatItemCode("INN", 10000), "INN-10000");
+  assert.deepEqual(parseItemCode("KRZ-0042"), { prefix: "KRZ", number: 42 });
+  assert.equal(normalizePrefixLetters("Ławka"), "LAWKA");
+  assert.equal(normalizePrefixLetters("żółć"), "ZOLC");
 
   assert.deepEqual(gateRole(undefined, CATALOG_WRITE_ROLES), {
     ok: false,
@@ -34,7 +35,7 @@ function main() {
     role: "architekt",
   });
 
-  console.log("prove-catalog: ok (Code128 value shape + write/read gates)");
+  console.log("prove-catalog: ok (item code shape · PL→ASCII · write/read gates)");
 }
 
 main();
