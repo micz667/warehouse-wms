@@ -1,5 +1,6 @@
 import type { Movement, PrismaClient } from "@prisma/client";
 import { parsePositiveQty } from "./parse-positive-qty";
+import { lockStockKeys } from "@/server/stock/lock-stock-keys";
 import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export type PostTransferInput = {
@@ -67,6 +68,12 @@ export async function postTransfer(
         message: "Nie znaleziono lokalizacji docelowej",
       };
     }
+
+    // Lock source (balance-checked) and destination in sorted order.
+    await lockStockKeys(tx, [
+      { catalogItemId: item.id, locationId: fromLoc.id },
+      { catalogItemId: item.id, locationId: toLoc.id },
+    ]);
 
     const balance = await sumMovementQty(tx, {
       catalogItemId: item.id,

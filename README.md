@@ -34,7 +34,11 @@ SEED_ADMIN_PASSWORD="change-me"
 
 Hasła z przykładu to wyłącznie placeholdery lokalne — nigdy nie używaj ich w środowisku współdzielonym.
 
+Seed tworzy administratora tylko gdy go brakuje i **nie nadpisuje** istniejącego hasła. Aby świadomie zresetować hasło admina przy seedzie, ustaw `SEED_ADMIN_RESET=1` (albo `true`) w `.env`.
+
 ## Postgres (Docker)
+
+`docker-compose.yml` publikuje Postgres na hoście pod portem **5432** (kontener `5432:5432`).
 
 ```bash
 docker compose up -d
@@ -43,7 +47,7 @@ npx prisma generate
 npx prisma db seed
 ```
 
-Seed tworzy lokalnego administratora (`admin@local` / `change-me` domyślnie).
+Seed tworzy lokalnego administratora (`admin@local` / `change-me` domyślnie) tylko przy pierwszym uruchomieniu dla tego emaila.
 
 ## Development
 
@@ -59,7 +63,7 @@ Aplikacja: [http://localhost:3000](http://localhost:3000) — bez sesji przekier
 npm run check
 ```
 
-Uruchamia lint (ESLint), `tsc --noEmit`, `prisma validate`, dowód bramki ról (`prove:gate-role`), dowód katalogu (`prove:catalog`) oraz dowód lokalizacji (`prove:locations`: normalizacja kodu + bramki admin write / hall read).
+Uruchamia lint (ESLint), `tsc --noEmit`, `prisma validate`, oraz łańcuch dowodów (`prove:*` / `prove:*-db`), w tym F019: `prove:hardening`, `prove:stock-concurrency-db`, `prove:cafe-double-post-db`, `prove:opening-stocktake-once-db`. Skrypty `*-db` wymagają działającego Postgresa pod `DATABASE_URL` (domyślnie `localhost:5432`).
 
 Przy uruchomionym serwerze (`npm run build && npm start`) możesz też:
 
@@ -75,7 +79,7 @@ npm run prove:locations-http
 
 - UI: `/katalog`, `/katalog/nowy`, `/katalog/[id]`, `/katalog/[id]/etykieta`
 - Symbologia etykiet: **Code128** (JsBarcode `CODE128`), wartość `WMS` + 12 hex
-- Zdjęcia opcjonalne: lokalnie w `storage/catalog/`, serwowane przez `/uploads/catalog/[filename]` (ścieżka w `CatalogItem.photoPath`)
+- Zdjęcia opcjonalne: lokalnie w `storage/catalog/`, serwowane przez `/uploads/catalog/[filename]` **tylko dla zalogowanych** (ścieżka w `CatalogItem.photoPath`); treść pliku sprawdzana po magic bytes, nie po MIME przeglądarki
 - Zapis (create/edit/photo): role `magazynier` i `admin`; odczyt także dla `architekt`
 - Seam dla F005: `createCatalogItem` w `src/server/catalog/create-catalog-item.ts`
 
@@ -96,4 +100,4 @@ npm run prove:locations-http
 
 Next.js App Router · Postgres · Prisma · Auth.js · Tailwind · PWA (kamera)
 
-Katalog, stany i Symfonia — kolejne slice'y; stan magazynowy nigdy nie jest kolumną zapisywaną ad hoc.
+Stan magazynowy nigdy nie jest kolumną zapisywaną ad hoc — zawsze suma ruchów (`Movement`).

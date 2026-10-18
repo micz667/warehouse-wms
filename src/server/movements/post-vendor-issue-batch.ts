@@ -1,6 +1,7 @@
 import type { Movement, PrismaClient } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import { parsePositiveQty } from "./parse-positive-qty";
+import { lockStockKeys } from "@/server/stock/lock-stock-keys";
 import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export type VendorIssueLineInput = {
@@ -88,6 +89,14 @@ export async function postVendorIssueBatch(
   return db.$transaction(async (tx) => {
     const movements: Movement[] = [];
 
+    // Resolve + validate all lines, then lock in sorted order before any balance read.
+    const resolved: {
+      catalogItemId: string;
+      locationId: string;
+      locationCode: string;
+      qty: Decimal;
+    }[] = [];
+
     for (const line of parsedLines) {
       const [item, location] = await Promise.all([
         tx.catalogItem.findUnique({ where: { id: line.catalogItemId } }),
@@ -114,24 +123,40 @@ export async function postVendorIssueBatch(
           message: `Lokalizacja ${location.code} nie jest sekcją renowacji`,
         };
       }
-
-      const balance = await sumMovementQty(tx, {
+      resolved.push({
         catalogItemId: item.id,
         locationId: location.id,
+        locationCode: location.code,
+        qty: line.qty,
+      });
+    }
+
+    await lockStockKeys(
+      tx,
+      resolved.map((r) => ({
+        catalogItemId: r.catalogItemId,
+        locationId: r.locationId,
+      })),
+    );
+
+    for (const line of resolved) {
+      const balance = await sumMovementQty(tx, {
+        catalogItemId: line.catalogItemId,
+        locationId: line.locationId,
       });
       if (balance.lt(line.qty)) {
         return {
           ok: false as const,
           error: "insufficient_stock" as const,
-          message: `Brak stanu w renowacji (${location.code}): dostępne ${balance.toString()}, żądane ${line.qty.toString()}`,
+          message: `Brak stanu w renowacji (${line.locationCode}): dostępne ${balance.toString()}, żądane ${line.qty.toString()}`,
         };
       }
 
       const movement = await tx.movement.create({
         data: {
           type: "issue",
-          catalogItemId: item.id,
-          locationId: location.id,
+          catalogItemId: line.catalogItemId,
+          locationId: line.locationId,
           qty: line.qty.neg(),
           createdById: input.createdById ?? null,
         },

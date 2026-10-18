@@ -1,4 +1,5 @@
 import type { Movement, PrismaClient } from "@prisma/client";
+import { lockStockKeys } from "@/server/stock/lock-stock-keys";
 import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export type PostCorrectionInput = {
@@ -64,6 +65,13 @@ export async function postCorrection(
         message: "Ten ruch ma już korektę (storno)",
       };
     }
+
+    await lockStockKeys(tx, [
+      {
+        catalogItemId: original.catalogItemId,
+        locationId: original.locationId,
+      },
+    ]);
 
     const oppositeQty = original.qty.neg();
     if (oppositeQty.isNegative()) {
