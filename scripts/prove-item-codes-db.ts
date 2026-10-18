@@ -75,13 +75,31 @@ async function main() {
   if (blocked.ok) throw new Error("expected prefix_in_use");
   assert.equal(blocked.error, "prefix_in_use");
 
-  // 5) Unused prefix (fresh row) can be edited
+  // 5) Unused prefix (fresh row) can be edited — pick free prefixes from DB.
   const freshCat = `F020 Fresh ${suffix}`;
-  // Unique 3–4 letter prefixes (avoid collisions across prove re-runs).
-  const alpha = suffix.replace(/[^a-z]/gi, "").toUpperCase();
-  const pad = (alpha + "XYZW").slice(0, 4);
-  const freshPrefix = pad.slice(0, 3);
-  const renamedPrefix = pad.slice(0, 4);
+  const taken = new Set(
+    (await prisma.categoryPrefix.findMany({ select: { prefix: true } })).map(
+      (r) => r.prefix,
+    ),
+  );
+  function freePrefix(len: number, start: string): string {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (let i = 0; i < alphabet.length; i++) {
+      for (let j = 0; j < alphabet.length; j++) {
+        const candidate =
+          len === 3
+            ? `${start}${alphabet[i]}${alphabet[j]}`
+            : `${start}${alphabet[i]}${alphabet[j]}Z`;
+        if (!taken.has(candidate)) {
+          taken.add(candidate);
+          return candidate;
+        }
+      }
+    }
+    throw new Error("no free test prefix");
+  }
+  const freshPrefix = freePrefix(3, "Y");
+  const renamedPrefix = freePrefix(4, "Y");
   assert.notEqual(freshPrefix, renamedPrefix);
   const fresh = await prisma.categoryPrefix.create({
     data: { category: freshCat, prefix: freshPrefix, nextNumber: 1 },
