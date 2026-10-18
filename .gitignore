@@ -52,3 +52,6 @@ next-env.d.ts
 /storage/catalog/*
 !/storage/catalog/.gitkeep
 /public/uploads/
+
+# local import inputs (raw POC export, photos) — never commit
+/.import/
