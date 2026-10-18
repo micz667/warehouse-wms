@@ -38,8 +38,11 @@ export default async function KatalogEtykietaPage({ params }: Props) {
         <h1 className="mt-3 max-w-md text-center text-2xl font-semibold tracking-tight">
           {item.name}
         </h1>
+        <p className="mt-1 font-mono text-lg font-semibold tracking-wide text-zinc-900">
+          {item.barcode}
+        </p>
         <p className="mt-1 text-sm text-zinc-600">
-          {item.sku} · {item.category} · {item.unit}
+          {item.category} · {item.unit}
         </p>
         <div className="mt-8 rounded border border-zinc-200 bg-white p-6" data-testid="catalog-label-barcode">
           <BarcodeLabel value={item.barcode} height={72} />

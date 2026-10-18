@@ -54,17 +54,23 @@ export async function PATCH(request: Request, context: RouteContext) {
   const record = body as Record<string, unknown>;
   const { id } = await context.params;
   const result = await updateCatalogItem(prisma, id, {
-    sku: typeof record.sku === "string" ? record.sku : undefined,
     name: typeof record.name === "string" ? record.name : undefined,
     category: typeof record.category === "string" ? record.category : undefined,
     unit: typeof record.unit === "string" ? record.unit : undefined,
+    externalBarcode:
+      record.externalBarcode === null
+        ? null
+        : typeof record.externalBarcode === "string"
+          ? record.externalBarcode
+          : undefined,
   });
 
   if (!result.ok) {
     const status =
       result.error === "not_found"
         ? 404
-        : result.error === "sku_taken"
+        : result.error === "sku_taken" ||
+            result.error === "external_barcode_taken"
           ? 409
           : 400;
     return Response.json({ error: result.message }, { status });

@@ -50,7 +50,6 @@ export async function POST(request: Request, { params }: Params) {
         : "",
     newItem: newItemRaw
       ? {
-          sku: typeof newItemRaw.sku === "string" ? newItemRaw.sku : "",
           name: typeof newItemRaw.name === "string" ? newItemRaw.name : "",
           category:
             typeof newItemRaw.category === "string" ? newItemRaw.category : "",

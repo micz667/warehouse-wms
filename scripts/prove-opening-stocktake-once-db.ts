@@ -17,7 +17,6 @@ async function main() {
   const suffix = Date.now().toString(36);
 
   const item = await createCatalogItem(prisma, {
-    sku: `F019-O-${suffix}`,
     name: `F019 opening ${suffix}`,
     category: "Test",
     unit: "szt",

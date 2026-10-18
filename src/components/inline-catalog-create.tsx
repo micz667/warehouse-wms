@@ -10,7 +10,9 @@ type Props = {
 };
 
 /**
- * POC-style inline catalog add on Przyjmij (F011).
+ * POC-style inline catalog add on Przyjmij (F011 / F020).
+ * Scanned manufacturer barcode is stored as externalBarcode; warehouse
+ * SKU/Code128 is the allocated category-prefix code.
  * Fieldset only — must not nest another form inside ReceiptForm.
  */
 export function InlineCatalogCreate({ barcode, onCreated, onCancel }: Props) {
@@ -71,7 +73,8 @@ export function InlineCatalogCreate({ barcode, onCreated, onCancel }: Props) {
         Nieznany kod — dodaj do katalogu
       </legend>
       <p className="text-sm text-amber-900">
-        Uzupełnij pola i zapisz pozycję, potem dokończ przyjęcie.
+        Przydzielimy kod magazynowy z kategorii. Zeskanowany kod producenta
+        zostanie zapisany osobno — też otworzy pozycję w skanerze.
       </p>
 
       <label className="block space-y-1">
@@ -88,7 +91,7 @@ export function InlineCatalogCreate({ barcode, onCreated, onCancel }: Props) {
       </label>
 
       <label className="block space-y-1">
-        <span className="text-sm font-medium text-zinc-800">Tagi</span>
+        <span className="text-sm font-medium text-zinc-800">Tagi / kategoria</span>
         <input
           type="text"
           value={tags}
@@ -113,7 +116,9 @@ export function InlineCatalogCreate({ barcode, onCreated, onCancel }: Props) {
       </label>
 
       <label className="block space-y-1">
-        <span className="text-sm font-medium text-zinc-800">Kod kreskowy</span>
+        <span className="text-sm font-medium text-zinc-800">
+          Kod producenta (zeskanowany)
+        </span>
         <input
           type="text"
           value={barcode}

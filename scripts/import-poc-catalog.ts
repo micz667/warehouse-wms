@@ -12,21 +12,24 @@
  *   ... --photos-dir .import/poc/uploads   (optional: copy first photo per item
  *        into storage/catalog/ when the WMS item has no photo yet)
  *
- * Identity: SKU = `POC-<poc item id>`; barcode = deterministic Code128 value
- * `WMS` + 12 hex of sha256(poc id) — same shape as generated WMS barcodes.
- * Re-runs match by SKU (then barcode) and only update name/category/unit/
- * description when they differ. Barcode is never rewritten; photo only set
- * when empty.
+ * Identity (F020): `sourceRef` = `poc:<poc item id>` (unique). Re-runs match
+ * by sourceRef first. SKU and Code128 barcode are the category-prefix code
+ * (e.g. KRZ-0042). Codes are immutable — re-runs do not renumber.
+ *
+ * Deterministic numbering on a fresh DB: items sorted by category path, then
+ * name, then POC id; codes allocated in that order after seeding the prefix
+ * registry from `prisma/data/category-prefixes.csv`.
  *
  * Stock is NOT imported. POC quantities/locations are written to
  * `<source dir>/poc-opening-hints.csv` to plan the opening stocktake (F005).
  */
 import "dotenv/config";
 import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { prisma } from "../src/lib/prisma";
+import { allocateItemCode } from "../src/server/category-prefixes/allocate-item-code";
+import { ensureCategoryPrefixesFromCsv } from "../src/server/category-prefixes/ensure-prefixes";
 import { catalogPhotoDir } from "../src/server/catalog/save-catalog-photo";
 
 type PocCategory = { id: string; name: string; parentId: string | null };
@@ -41,6 +44,7 @@ type PocItem = {
   locations: string;
   attributes: string;
   categoryId: string | null;
+  createdAt?: string;
 };
 type PocExport = {
   exportedAt: string;
@@ -50,7 +54,7 @@ type PocExport = {
   photos: { itemId: string; path: string; sortOrder: number }[];
 };
 
-const ITEM_SQL = `select id, name, description, notes, quantity, condition, locationNote, locations, attributes, categoryId from Item order by createdAt`;
+const ITEM_SQL = `select id, name, description, notes, quantity, condition, locationNote, locations, attributes, categoryId, createdAt from Item order by createdAt`;
 const CATEGORY_SQL = `select id, name, parentId from Category`;
 const TAG_SQL = `select it.itemId as itemId, t.name as name from ItemTag it join Tag t on t.id = it.tagId order by t.name`;
 const PHOTO_SQL = `select itemId, path, sortOrder from ItemPhoto order by itemId, sortOrder, createdAt`;
@@ -62,6 +66,10 @@ const CONDITION_PL: Record<string, string> = {
   do_naprawy: "do naprawy",
   niekompletny: "niekompletny",
 };
+
+export function pocSourceRef(pocId: string): string {
+  return `poc:${pocId}`;
+}
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(name);
@@ -100,15 +108,6 @@ async function loadExport(): Promise<{ data: PocExport; dir: string }> {
   throw new Error("Pass --from-db <warehouse.db> or --source <poc-export.json>");
 }
 
-export function pocSku(pocId: string): string {
-  return `POC-${pocId}`;
-}
-
-export function pocBarcode(pocId: string): string {
-  const hex = createHash("sha256").update(`warehouse-poc:${pocId}`).digest("hex");
-  return `WMS${hex.slice(0, 12).toUpperCase()}`;
-}
-
 function categoryPath(cats: Map<string, PocCategory>, id: string | null): string {
   const parts: string[] = [];
   let cur = id ? cats.get(id) : undefined;
@@ -133,6 +132,7 @@ function buildDescription(item: PocItem, tags: string[]): string | null {
   if (item.description?.trim()) lines.push(item.description.trim());
   if (item.notes?.trim()) lines.push(item.notes.trim());
   lines.push(`Stan (POC): ${CONDITION_PL[item.condition] ?? item.condition}`);
+  lines.push(`POC id: ${item.id}`);
   const attrs = parseJson<Record<string, unknown>>(item.attributes, {});
   const dims = ["lengthCm", "widthCm", "heightCm"]
     .map((k) => attrs[k])
@@ -158,6 +158,10 @@ async function main() {
   const photosDir = arg("--photos-dir");
   const { data, dir } = await loadExport();
 
+  if (apply) {
+    await ensureCategoryPrefixesFromCsv(prisma);
+  }
+
   const cats = new Map(data.categories.map((c) => [c.id, c]));
   const tagsByItem = new Map<string, string[]>();
   for (const t of data.tags) {
@@ -166,67 +170,74 @@ async function main() {
   const firstPhoto = new Map<string, string>();
   for (const p of data.photos) if (!firstPhoto.has(p.itemId)) firstPhoto.set(p.itemId, p.path);
 
+  type Prepared = {
+    item: PocItem;
+    name: string;
+    category: string;
+    sourceRef: string;
+    description: string | null;
+    tags: string[];
+  };
+
+  const prepared: Prepared[] = [];
+  const skippedReasons: string[] = [];
+  for (const item of data.items) {
+    const name = item.name?.trim();
+    if (!name) {
+      skippedReasons.push(`${item.id}: empty name`);
+      continue;
+    }
+    const tags = tagsByItem.get(item.id) ?? [];
+    const category = categoryPath(cats, item.categoryId);
+    prepared.push({
+      item,
+      name: name.slice(0, 200),
+      category,
+      sourceRef: pocSourceRef(item.id),
+      description: buildDescription(item, tags),
+      tags,
+    });
+  }
+
+  // Deterministic order → stable codes on a fresh DB.
+  prepared.sort((a, b) => {
+    const c = a.category.localeCompare(b.category, "pl");
+    if (c !== 0) return c;
+    const n = a.name.localeCompare(b.name, "pl");
+    if (n !== 0) return n;
+    return a.item.id.localeCompare(b.item.id);
+  });
+
   const stats = {
     source: data.items.length,
     created: 0,
     updated: 0,
     unchanged: 0,
-    skipped: 0,
+    skipped: skippedReasons.length,
     photosSet: 0,
     photosMissing: 0,
   };
-  const skippedReasons: string[] = [];
   const hints: string[] = [
     ["sku", "barcode", "name", "poc_qty", "poc_condition", "poc_locations"].join(";"),
   ];
 
   if (photosDir && apply) await mkdir(catalogPhotoDir(), { recursive: true });
 
-  for (const item of data.items) {
-    const name = item.name?.trim();
-    if (!name) {
-      stats.skipped++;
-      skippedReasons.push(`${item.id}: empty name`);
-      continue;
-    }
-    const sku = pocSku(item.id);
-    const barcode = pocBarcode(item.id);
-    const tags = tagsByItem.get(item.id) ?? [];
-    let category = categoryPath(cats, item.categoryId);
-    if (tags.length) category = `${category}, ${tags.join(", ")}`;
+  for (const row of prepared) {
+    const { item, name, category, sourceRef, description } = row;
     const fields = {
-      name: name.slice(0, 200),
+      name,
       category,
       unit: "szt",
-      description: buildDescription(item, tags),
+      description,
     };
 
-    const locs = parseJson<{ note?: string; qty?: number }[]>(item.locations, []);
-    hints.push(
-      [
-        sku,
-        barcode,
-        name,
-        item.quantity,
-        item.condition,
-        locs.map((l) => `${l.note ?? "?"}×${l.qty ?? "?"}`).join(" | ") ||
-          (item.locationNote ?? ""),
-      ]
-        .map(csvCell)
-        .join(";"),
-    );
-
-    let existing = await prisma.catalogItem.findUnique({ where: { sku } });
+    let existing = await prisma.catalogItem.findUnique({ where: { sourceRef } });
+    // Legacy import matched POC-<id> SKU / WMS* barcode — still find those.
     if (!existing) {
-      const byBarcode = await prisma.catalogItem.findUnique({ where: { barcode } });
-      if (byBarcode) {
-        if (byBarcode.sku !== sku) {
-          stats.skipped++;
-          skippedReasons.push(`${item.id}: barcode ${barcode} used by SKU ${byBarcode.sku}`);
-          continue;
-        }
-        existing = byBarcode;
-      }
+      existing = await prisma.catalogItem.findUnique({
+        where: { sku: `POC-${item.id}` },
+      });
     }
 
     let photoPath: string | null | undefined;
@@ -249,21 +260,64 @@ async function main() {
       }
     }
 
+    let code = existing?.sku ?? existing?.barcode ?? null;
     if (!existing) {
-      stats.created++;
       if (apply) {
+        code = await allocateItemCode(prisma, category);
+      } else {
+        // Dry-run: show planned category; exact number needs live counter.
+        code = `(pending:${category})`;
+      }
+      stats.created++;
+      hints.push(
+        [
+          code,
+          code,
+          name,
+          item.quantity,
+          item.condition,
+          parseJson<{ note?: string; qty?: number }[]>(item.locations, [])
+            .map((l) => `${l.note ?? "?"}×${l.qty ?? "?"}`)
+            .join(" | ") || (item.locationNote ?? ""),
+        ]
+          .map(csvCell)
+          .join(";"),
+      );
+      if (apply && code) {
         await prisma.catalogItem.create({
-          data: { sku, barcode, ...fields, photoPath: photoPath ?? null },
+          data: {
+            sku: code,
+            barcode: code,
+            sourceRef,
+            ...fields,
+            photoPath: photoPath ?? null,
+          },
         });
       }
       continue;
     }
+
+    hints.push(
+      [
+        existing.sku,
+        existing.barcode,
+        name,
+        item.quantity,
+        item.condition,
+        parseJson<{ note?: string; qty?: number }[]>(item.locations, [])
+          .map((l) => `${l.note ?? "?"}×${l.qty ?? "?"}`)
+          .join(" | ") || (item.locationNote ?? ""),
+      ]
+        .map(csvCell)
+        .join(";"),
+    );
 
     const changed =
       existing.name !== fields.name ||
       existing.category !== fields.category ||
       existing.unit !== fields.unit ||
       (existing.description ?? null) !== fields.description ||
+      existing.sourceRef !== sourceRef ||
       photoPath !== undefined;
     if (!changed) {
       stats.unchanged++;
@@ -271,9 +325,14 @@ async function main() {
     }
     stats.updated++;
     if (apply) {
+      // Never rewrite sku/barcode — codes are immutable (F020).
       await prisma.catalogItem.update({
         where: { id: existing.id },
-        data: { ...fields, ...(photoPath !== undefined ? { photoPath } : {}) },
+        data: {
+          ...fields,
+          sourceRef,
+          ...(photoPath !== undefined ? { photoPath } : {}),
+        },
       });
     }
   }

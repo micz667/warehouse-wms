@@ -1,18 +1,20 @@
 import type { CatalogItem, PrismaClient } from "@prisma/client";
 
 export type UpdateCatalogItemInput = {
+  /** Ignored when present — item codes are immutable after assign (F020). */
   sku?: string;
   name?: string;
   category?: string;
   unit?: string;
   photoPath?: string | null;
+  externalBarcode?: string | null;
 };
 
 export type UpdateCatalogItemResult =
   | { ok: true; item: CatalogItem }
   | {
       ok: false;
-      error: "not_found" | "validation" | "sku_taken";
+      error: "not_found" | "validation" | "sku_taken" | "external_barcode_taken";
       message: string;
     };
 
@@ -24,7 +26,11 @@ function trimOptional(value: unknown): string | undefined | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-/** Updates editable catalog fields. Barcode stays immutable after create (label already printed). */
+/**
+ * Updates editable catalog fields.
+ * SKU and warehouse barcode stay immutable (labels already printed).
+ * Category may change for filing — it does NOT renumber the code (F020).
+ */
 export async function updateCatalogItem(
   db: PrismaClient,
   id: string,
@@ -36,34 +42,12 @@ export async function updateCatalogItem(
   }
 
   const data: {
-    sku?: string;
     name?: string;
     category?: string;
     unit?: string;
     photoPath?: string | null;
+    externalBarcode?: string | null;
   } = {};
-
-  if (input.sku !== undefined) {
-    const sku = trimOptional(input.sku);
-    if (!sku) {
-      return {
-        ok: false,
-        error: "validation",
-        message: "SKU nie może być puste",
-      };
-    }
-    if (sku !== existing.sku) {
-      const taken = await db.catalogItem.findUnique({ where: { sku } });
-      if (taken) {
-        return {
-          ok: false,
-          error: "sku_taken",
-          message: "SKU już istnieje",
-        };
-      }
-      data.sku = sku;
-    }
-  }
 
   if (input.name !== undefined) {
     const name = trimOptional(input.name);
@@ -103,6 +87,39 @@ export async function updateCatalogItem(
 
   if (input.photoPath !== undefined) {
     data.photoPath = input.photoPath;
+  }
+
+  if (input.externalBarcode !== undefined) {
+    const external = trimOptional(input.externalBarcode);
+    if (external === null) {
+      data.externalBarcode = null;
+    } else if (external !== undefined) {
+      if (external === existing.barcode || external === existing.sku) {
+        return {
+          ok: false,
+          error: "validation",
+          message: "Kod zewnętrzny nie może być równy kodowi magazynowemu",
+        };
+      }
+      const taken = await db.catalogItem.findFirst({
+        where: {
+          AND: [
+            { id: { not: id } },
+            {
+              OR: [{ barcode: external }, { externalBarcode: external }],
+            },
+          ],
+        },
+      });
+      if (taken) {
+        return {
+          ok: false,
+          error: "external_barcode_taken",
+          message: "Kod zewnętrzny / producenta już istnieje",
+        };
+      }
+      data.externalBarcode = external;
+    }
   }
 
   const item = await db.catalogItem.update({

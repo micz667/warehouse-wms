@@ -27,7 +27,6 @@ async function seedPreparedDoc(suffix: string, tag: string) {
   });
 
   const item = await createCatalogItem(prisma, {
-    sku: `F019-C-${tag}-${suffix}`,
     name: `F019 cafe ${tag} ${suffix}`,
     category: "Test",
     unit: "szt",

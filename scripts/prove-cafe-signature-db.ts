@@ -32,7 +32,6 @@ async function main() {
   });
 
   const itemA = await createCatalogItem(prisma, {
-    sku: `F13BS-A-${suffix}`,
     name: `F013b A ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -41,7 +40,6 @@ async function main() {
   if (!itemA.ok) throw new Error("catalog A failed");
 
   const itemB = await createCatalogItem(prisma, {
-    sku: `F13BS-B-${suffix}`,
     name: `F013b B ${suffix}`,
     category: "Test",
     unit: "szt",

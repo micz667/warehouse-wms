@@ -1,0 +1,55 @@
+category,prefix,itemCount,exampleCode
+Bez kategorii,INN,0,INN-0001
+Eksploatacja,EXP,1,EXP-0001
+Eksploatacja / Kosze na śmieci,KOS,1,KOS-0001
+Inne / unikat / Drzwi,DRZ,4,DRZ-0001
+Inne / unikat / Eventy,EVT,5,EVT-0001
+Inne / unikat / Inne,IUN,55,IUN-0001
+Inne / unikat / Lampy / LED,LED,0,LED-0001
+Inne / unikat / Ozdoby,OZD,61,OZD-0001
+Inwestycje / Inne,IIN,23,IIN-0001
+Inwestycje / Klimatyzacja,KLIM,5,KLIM-0001
+Inwestycje / Podłoga,POD,11,POD-0001
+Inwestycje / Płytki,PLY,56,PLY-0001
+Meble / Bar,BAR,19,BAR-0001
+Meble / Drobne,DRO,4,DRO-0001
+Meble / Inne,MIN,20,MIN-0001
+Meble / Krzesła,MKR,2,MKR-0001
+Meble / Lampy,LAM,146,LAM-0001
+Meble / Lustra,LUS,19,LUS-0001
+Meble / Plotki,PLO,7,PLO-0001
+Meble / Poduchy / Fotele,PFT,3,PFT-0001
+Meble / Poduchy / Kanapy,PKA,3,PKA-0001
+Meble / Poduchy / Krzesła,PKR,8,PKR-0001
+Meble / Przechowywanie / Regały,REG,9,REG-0001
+Meble / Przechowywanie / Skrzynki,SKR,13,SKR-0001
+Meble / Przechowywanie / Szafki,SZF,4,SZF-0001
+Meble / Przechowywanie / Wózki,WOZ,4,WOZ-0001
+Meble / Siedzenia,MSD,1,MSD-0001
+Meble / Siedzenia / Fotele,FOT,59,FOT-0001
+Meble / Siedzenia / Hokery,HOK,5,HOK-0001
+Meble / Siedzenia / Kanapy,KAN,70,KAN-0001
+Meble / Siedzenia / Krzesła,KRZ,58,KRZ-0001
+Meble / Siedzenia / Leżaki,LEZ,1,LEZ-0001
+Meble / Siedzenia / Stołki,STK,14,STK-0001
+Meble / Siedzenia / Ławki,LAW,6,LAW-0001
+Meble / Stoły / Blat,BLT,30,BLT-0001
+Meble / Stoły / Komplet,STO,61,STO-0001
+Meble / Stoły / Nogi,NOG,13,NOG-0001
+Naczynia,NAC,4,NAC-0001
+Ogródki,OGR,69,OGR-0001
+Sprzęt / Armatura,ARM,2,ARM-0001
+Sprzęt / Audio,AUD,11,AUD-0001
+Sprzęt / Chłodnictwo,CHD,3,CHD-0001
+Sprzęt / Chłodnictwo / Drobnica,CDR,1,CDR-0001
+Sprzęt / Chłodnictwo / Inne,CIN,9,CIN-0001
+Sprzęt / Chłodnictwo / Szafa chłodnicza,SCH,13,SCH-0001
+Sprzęt / Chłodnictwo / Szafa mroźnicza,SMR,10,SMR-0001
+Sprzęt / Eventowe,SEV,3,SEV-0001
+Sprzęt / HVAC,HVAC,8,HVAC-0001
+Sprzęt / Inne AGD,AGD,32,AGD-0001
+Sprzęt / Kawa / Ekspresy,EKS,3,EKS-0001
+Sprzęt / Kawa / Młynki,MLY,7,MLY-0001
+Sprzęt / Kawa / Termosy,TER,2,TER-0001
+Sprzęt / Podgrzewacz wody,PDW,0,PDW-0001
+Straty,STR,34,STR-0001

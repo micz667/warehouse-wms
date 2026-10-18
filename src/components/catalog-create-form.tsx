@@ -6,7 +6,6 @@ import { useState } from "react";
 
 export function CatalogCreateForm() {
   const router = useRouter();
-  const [sku, setSku] = useState("");
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [unit, setUnit] = useState("szt");
@@ -21,7 +20,7 @@ export function CatalogCreateForm() {
       const res = await fetch("/api/catalog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sku, name, category, unit }),
+        body: JSON.stringify({ name, category, unit }),
       });
       const body = (await res.json().catch(() => null)) as
         | { item?: { id: string }; error?: string }
@@ -43,19 +42,11 @@ export function CatalogCreateForm() {
         Nowa pozycja
       </h1>
       <p className="mt-1 text-zinc-600">
-        Kod kreskowy Code128 zostanie wygenerowany automatycznie.
+        Kod pozycji (SKU i Code128) zostanie przydzielony z prefiksu kategorii
+        — np. KRZ-0042.
       </p>
 
       <div className="mt-8 space-y-4">
-        <Field label="SKU" id="sku">
-          <input
-            id="sku"
-            required
-            value={sku}
-            onChange={(e) => setSku(e.target.value)}
-            className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
-          />
-        </Field>
         <Field label="Nazwa" id="name">
           <input
             id="name"
@@ -72,6 +63,7 @@ export function CatalogCreateForm() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
+            placeholder="np. Meble / Siedzenia / Krzesła"
           />
         </Field>
         <Field label="Jednostka" id="unit">

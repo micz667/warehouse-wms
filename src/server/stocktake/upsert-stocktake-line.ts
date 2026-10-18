@@ -7,7 +7,6 @@ export type UpsertStocktakeLineInput = {
   catalogItemId?: string;
   /** Inline create when catalog item is missing during count. */
   newItem?: {
-    sku: string;
     name: string;
     category: string;
     unit: string;
@@ -27,7 +26,9 @@ export type UpsertStocktakeLineResult =
         | "item_not_found"
         | "location_not_found"
         | "sku_taken"
-        | "barcode_taken";
+        | "barcode_taken"
+        | "external_barcode_taken"
+        | "source_ref_taken";
       message: string;
     };
 

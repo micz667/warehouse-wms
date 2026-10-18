@@ -51,7 +51,6 @@ async function main() {
   if (!actorB.ok) throw new Error("actorB create failed");
 
   const itemA = await createCatalogItem(prisma, {
-    sku: `F009A-${suffix}`,
     name: `F009 item A ${suffix}`,
     category: "Test",
     unit: "szt",
@@ -60,7 +59,6 @@ async function main() {
   if (!itemA.ok) throw new Error("itemA failed");
 
   const itemB = await createCatalogItem(prisma, {
-    sku: `F009B-${suffix}`,
     name: `F009 item B ${suffix}`,
     category: "Test",
     unit: "szt",

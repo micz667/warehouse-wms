@@ -36,7 +36,6 @@ async function main() {
   const archCookie = await sessionCookie("architekt", "arch@local");
 
   const item = await createCatalogItem(prisma, {
-    sku: `HTTP-${suffix}`,
     name: `HTTP item ${suffix}`,
     category: "Test",
     unit: "szt",

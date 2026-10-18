@@ -29,7 +29,6 @@ async function main() {
   });
 
   const item = await createCatalogItem(prisma, {
-    sku: `F007-${suffix}`,
     name: `F007 pozycja ${suffix}`,
     category: "Test",
     unit: "szt",
