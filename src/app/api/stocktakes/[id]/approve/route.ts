@@ -28,6 +28,7 @@ export async function POST(_request: Request, { params }: Params) {
       result.error === "not_found"
         ? 404
         : result.error === "already_approved" ||
+            result.error === "opening_already_done" ||
             result.error === "invalid_status"
           ? 409
           : 400;

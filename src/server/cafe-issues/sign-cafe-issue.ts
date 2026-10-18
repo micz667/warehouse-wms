@@ -1,4 +1,5 @@
 import type { CafeIssue, Movement, PrismaClient } from "@prisma/client";
+import { lockStockKeys } from "@/server/stock/lock-stock-keys";
 import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export type SignCafeIssueInput = {
@@ -56,6 +57,8 @@ function parseSignatureData(raw: unknown):
  * On-site receipt: persist finger signature and post issue movements in one
  * transaction. Stock leaves the warehouse only after a successful sign (F013b).
  * Same negative-stock rule as hall issue — refuse overdraw.
+ * Status flip is atomic (updateMany where prepared) so a double tap cannot
+ * post issue movements twice.
  */
 export async function signCafeIssue(
   db: PrismaClient,
@@ -110,9 +113,15 @@ export async function signCafeIssue(
       };
     }
 
-    const signedAt = new Date();
-    const movements: Movement[] = [];
+    await lockStockKeys(
+      tx,
+      doc.lines.map((line) => ({
+        catalogItemId: line.catalogItemId,
+        locationId: line.sourceLocationId,
+      })),
+    );
 
+    // Balance checks before any write — Prisma commits on returned { ok: false }.
     for (const line of doc.lines) {
       const balance = await sumMovementQty(tx, {
         catalogItemId: line.catalogItemId,
@@ -125,7 +134,29 @@ export async function signCafeIssue(
           message: `Brak stanu: dostępne ${balance.toString()}, żądane ${line.qty.toString()}`,
         };
       }
+    }
 
+    const signedAt = new Date();
+    const claimed = await tx.cafeIssue.updateMany({
+      where: { id: doc.id, status: "prepared" },
+      data: {
+        status: "received",
+        signatureData: parsedSig.data,
+        signedAt,
+        signedById: input.signedById ?? null,
+      },
+    });
+    if (claimed.count !== 1) {
+      return {
+        ok: false as const,
+        error: "invalid_status" as const,
+        message: "Dokument jest już podpisany — ponowny podpis zablokowany",
+      };
+    }
+
+    const movements: Movement[] = [];
+
+    for (const line of doc.lines) {
       const movement = await tx.movement.create({
         data: {
           type: "issue",
@@ -138,14 +169,8 @@ export async function signCafeIssue(
       movements.push(movement);
     }
 
-    const cafeIssue = await tx.cafeIssue.update({
+    const cafeIssue = await tx.cafeIssue.findUniqueOrThrow({
       where: { id: doc.id },
-      data: {
-        status: "received",
-        signatureData: parsedSig.data,
-        signedAt,
-        signedById: input.signedById ?? null,
-      },
     });
 
     return { ok: true as const, cafeIssue, movements };

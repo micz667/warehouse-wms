@@ -10,11 +10,11 @@
 
 ## NOW
 
-- (empty — post-MVP hall UX board complete)
+- F019 · Hardening: stock races, double posts, seed and uploads
 
 ## NEXT
 
-- (board empty — no further planned F0xx; do not invent F019)
+- (board empty after F019)
 
 ## PROVEN
 

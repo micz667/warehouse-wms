@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { auth } from "@/auth";
 import { catalogPhotoDir } from "@/server/catalog/save-catalog-photo";
 
 type RouteContext = { params: Promise<{ filename: string }> };
@@ -11,8 +12,13 @@ const CONTENT_TYPES: Record<string, string> = {
   ".webp": "image/webp",
 };
 
-/** Serves catalog photos from storage/catalog (works after upload without restarting next start). */
+/** Serves catalog photos from storage/catalog — logged-in users only. */
 export async function GET(_request: Request, context: RouteContext) {
+  const session = await auth();
+  if (!session?.user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const { filename } = await context.params;
   if (
     !filename ||
@@ -35,7 +41,7 @@ export async function GET(_request: Request, context: RouteContext) {
     return new Response(data, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": "private, max-age=86400",
       },
     });
   } catch {

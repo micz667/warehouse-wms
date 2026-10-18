@@ -1,5 +1,6 @@
 import type { Movement, PrismaClient } from "@prisma/client";
 import { parsePositiveQty } from "./parse-positive-qty";
+import { lockStockKeys } from "@/server/stock/lock-stock-keys";
 import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export type PostIssueInput = {
@@ -50,6 +51,10 @@ export async function postIssue(
         message: "Nie znaleziono lokalizacji",
       };
     }
+
+    await lockStockKeys(tx, [
+      { catalogItemId: item.id, locationId: location.id },
+    ]);
 
     const balance = await sumMovementQty(tx, {
       catalogItemId: item.id,

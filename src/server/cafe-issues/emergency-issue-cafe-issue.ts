@@ -1,4 +1,5 @@
 import type { CafeIssue, Movement, PrismaClient } from "@prisma/client";
+import { lockStockKeys } from "@/server/stock/lock-stock-keys";
 import { sumMovementQty } from "@/server/stock/sum-movement-qty";
 
 export type EmergencyIssueCafeIssueInput = {
@@ -50,6 +51,8 @@ function parseEmergencyNote(raw: unknown):
  * Conscious emergency bypass of cafe finger signature (F018).
  * Posts the same issue movements as signCafeIssue, marks signature skipped
  * with actor + reason, and leaves the document as received (not prepared).
+ * Status flip is atomic (updateMany where prepared) so a double tap cannot
+ * post issue movements twice.
  */
 export async function emergencyIssueCafeIssue(
   db: PrismaClient,
@@ -113,9 +116,15 @@ export async function emergencyIssueCafeIssue(
       };
     }
 
-    const issuedAt = new Date();
-    const movements: Movement[] = [];
+    await lockStockKeys(
+      tx,
+      doc.lines.map((line) => ({
+        catalogItemId: line.catalogItemId,
+        locationId: line.sourceLocationId,
+      })),
+    );
 
+    // Balance checks before any write — Prisma commits on returned { ok: false }.
     for (const line of doc.lines) {
       const balance = await sumMovementQty(tx, {
         catalogItemId: line.catalogItemId,
@@ -128,7 +137,31 @@ export async function emergencyIssueCafeIssue(
           message: `Brak stanu: dostępne ${balance.toString()}, żądane ${line.qty.toString()}`,
         };
       }
+    }
 
+    const issuedAt = new Date();
+    const claimed = await tx.cafeIssue.updateMany({
+      where: { id: doc.id, status: "prepared" },
+      data: {
+        status: "received",
+        signatureData: null,
+        signatureSkipped: true,
+        emergencyNote: parsedNote.note,
+        signedAt: issuedAt,
+        signedById: input.issuedById ?? null,
+      },
+    });
+    if (claimed.count !== 1) {
+      return {
+        ok: false as const,
+        error: "invalid_status" as const,
+        message: "Dokument jest już zamknięty — wydanie awaryjne zablokowane",
+      };
+    }
+
+    const movements: Movement[] = [];
+
+    for (const line of doc.lines) {
       const movement = await tx.movement.create({
         data: {
           type: "issue",
@@ -141,16 +174,8 @@ export async function emergencyIssueCafeIssue(
       movements.push(movement);
     }
 
-    const cafeIssue = await tx.cafeIssue.update({
+    const cafeIssue = await tx.cafeIssue.findUniqueOrThrow({
       where: { id: doc.id },
-      data: {
-        status: "received",
-        signatureData: null,
-        signatureSkipped: true,
-        emergencyNote: parsedNote.note,
-        signedAt: issuedAt,
-        signedById: input.issuedById ?? null,
-      },
     });
 
     return { ok: true as const, cafeIssue, movements };
